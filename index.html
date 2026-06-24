@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
@@ -16,9 +17,10 @@ button:hover { background: #21618c; }
 .correct { color: green; font-weight: bold; }
 .incorrect { color: red; font-weight: bold; }
 .table-wrap { overflow-x: auto; margin-top: 16px; }
-.table2 { border-collapse: collapse; width: 350px; background: #f9f9fa; }
-.table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-.table2 th { background: #d4e6f1; }
+.table2 { border-collapse: collapse; width: 380px; background: #f9f9fa; }
+.table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; vertical-align: middle; font-weight: normal; }
+.table2 th { background: #d4e6f1; font-weight: bold; }
+.table2 td.total-cell, .table2 th.total-cell { background: #f7ca18; color: #34495e; font-weight: bold; }
 .venn-wrap { width: 420px; height: 300px; margin: 0 auto;}
 @media (max-width: 600px){
   .venn-wrap { width: 99vw; height: 220px;}
@@ -58,21 +60,36 @@ button:hover { background: #21618c; }
     <button id="reset-table">Reset</button>
     <div class="table-wrap">
       <table class="table2" id="table2">
-        <tr>
-          <th></th>
-          <th id="colHead1"></th>
-          <th id="colHead2"></th>
-        </tr>
-        <tr>
-          <th id="rowHead1"></th>
-          <td><input class="input-small" id="cell11" type="number"></td>
-          <td><input class="input-small" id="cell12" type="number"></td>
-        </tr>
-        <tr>
-          <th id="rowHead2"></th>
-          <td><input class="input-small" id="cell21" type="number"></td>
-          <td><input class="input-small" id="cell22" type="number"></td>
-        </tr>
+        <thead>
+          <tr>
+            <th></th>
+            <th id="colHead1"></th>
+            <th id="colHead2"></th>
+            <th class="total-cell">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th id="rowHead1"></th>
+            <td><input class="input-small cell-input" id="cell11" type="number" min="0"></td>
+            <td><input class="input-small cell-input" id="cell12" type="number" min="0"></td>
+            <td class="total-cell" id="rowTotal1">0</td>
+          </tr>
+          <tr>
+            <th id="rowHead2"></th>
+            <td><input class="input-small cell-input" id="cell21" type="number" min="0"></td>
+            <td><input class="input-small cell-input" id="cell22" type="number" min="0"></td>
+            <td class="total-cell" id="rowTotal2">0</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th class="total-cell">Total</th>
+            <td class="total-cell" id="colTotal1">0</td>
+            <td class="total-cell" id="colTotal2">0</td>
+            <td class="total-cell" id="grandTotal">0</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
     <button id="table-check">Submit Table</button>
@@ -89,7 +106,7 @@ button:hover { background: #21618c; }
     <div class="venn-wrap" id="venn-plot"></div>
     <form id="venn-form">
       <label class="label">How many are in both sets (overlap)?</label>
-      <input type="number" id="venn-overlap" required>
+      <input type="number" id="venn-overlap" required min="0" step="1">
       <button type="submit">Submit Answer</button>
     </form>
     <div id="venn-feedback"></div>
@@ -137,7 +154,8 @@ document.getElementById('exclusive-form').onsubmit = function(e){
 }
 newEventExample();
 
-// --- TABLE ACTIVITY ---
+// --- TABLE ACTIVITY with totals row & column ---
+
 const tableExamples = [
   {
     desc:"Fill in the table for 'Favorite Fruit vs Likes Chocolate'.",
@@ -166,13 +184,49 @@ function newTableExample() {
   document.getElementById('colHead1').textContent = ex.colHeads[0];
   document.getElementById('colHead2').textContent = ex.colHeads[1];
   ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
+  // Reset totals:
+  document.getElementById('rowTotal1').textContent = "0";
+  document.getElementById('rowTotal2').textContent = "0";
+  document.getElementById('colTotal1').textContent = "0";
+  document.getElementById('colTotal2').textContent = "0";
+  document.getElementById('grandTotal').textContent = "0";
   document.getElementById('table-feedback').textContent = "";
 }
 document.getElementById('new-table').onclick=newTableExample;
 document.getElementById('reset-table').onclick=function(){
   ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
+  // Reset totals:
+  document.getElementById('rowTotal1').textContent = "0";
+  document.getElementById('rowTotal2').textContent = "0";
+  document.getElementById('colTotal1').textContent = "0";
+  document.getElementById('colTotal2').textContent = "0";
+  document.getElementById('grandTotal').textContent = "0";
   document.getElementById('table-feedback').textContent = "";
 };
+
+const inputCells = ["cell11","cell12","cell21","cell22"];
+inputCells.forEach(id=>{
+  document.getElementById(id).addEventListener('input', updateTotals);
+});
+function getCellNumber(id){
+  const v = parseInt(document.getElementById(id).value);
+  return (isNaN(v) || v < 0) ? 0 : v;
+}
+function updateTotals(){
+  const c11 = getCellNumber("cell11"), c12 = getCellNumber("cell12"),
+        c21 = getCellNumber("cell21"), c22 = getCellNumber("cell22");
+  const row1 = c11 + c12;
+  const row2 = c21 + c22;
+  const col1 = c11 + c21;
+  const col2 = c12 + c22;
+  const grand = row1 + row2;
+  document.getElementById('rowTotal1').textContent = row1;
+  document.getElementById('rowTotal2').textContent = row2;
+  document.getElementById('colTotal1').textContent = col1;
+  document.getElementById('colTotal2').textContent = col2;
+  document.getElementById('grandTotal').textContent = grand;
+}
+
 document.getElementById('table-check').onclick=function(){
   const ex = tableExamples[tableIdx];
   let correct = true;
@@ -187,36 +241,46 @@ document.getElementById('table-check').onclick=function(){
     feedback.innerHTML = "<span class='incorrect'>❌ Some values are not correct. Try again!</span>";
   }
 };
-newTableExample();
 
 // --- VENN DIAGRAM ---
+
 function randomVennData(){
-  // Simple random values for sets
-  let total = Math.floor(Math.random()*18)+12; // 12 to 29
-  let A = Math.floor(Math.random()*total/2)+4; // 4 to half of total
+  let total = Math.floor(Math.random()*18)+12; 
+  let A = Math.floor(Math.random()*total/2)+4; 
   let B = Math.floor(Math.random()*total/2)+4;
-  let overlap = Math.floor(Math.min(A,B)/2)+1; // at least 1 in the overlap, at most min(A,B)/2
-  return {total, A, B, overlap};
+  let overlap = Math.floor(Math.min(A,B)/2)+1;
+  // To ensure consistency:
+  // A only = A - overlap
+  // B only = B - overlap
+  // Neither = total - (A only + B only + overlap)
+  return {total, A, B, overlap, 
+          Aonly: A - overlap,
+          Bonly: B - overlap,
+          neither: 0 // to compute below
+         };
 }
+
 let vennData = randomVennData();
+vennData.neither = vennData.total - (vennData.Aonly + vennData.Bonly + vennData.overlap);
 
 function drawVenn(){
-  const {A,B,overlap,total} = vennData;
-  // Plotly traces for Venn circles
+  const {Aonly, Bonly, overlap, neither} = vennData;
   let traceA = {
-    x:[1], y:[1.5], text:`A<br>${A}`, mode:'text', name:'A', textfont:{size:20}, showlegend:false
+    x:[1], y:[1.5], text:`Set A: ${vennData.Aonly+overlap}`, mode:'text', showlegend:false, textfont:{size:20, color:'#2980b9'}
   };
   let traceB = {
-    x:[2], y:[1.5], text:`B<br>${B}`, mode:'text', name:'B', textfont:{size:20}, showlegend:false
+    x:[2], y:[1.5], text:`Set B: ${vennData.Bonly+overlap}`, mode:'text', showlegend:false, textfont:{size:20, color:'#27ae60'}
   };
   let traceOverlap = {
-    x:[1.5], y:[1.5], text:`Overlap<br>${overlap}`,mode:'text', name:'Overlap', textfont:{size:18}, showlegend:false
+    x:[1.5], y:[1.5], text:`Overlap: ${overlap}`, mode:'text', showlegend:false, textfont:{size:18, color:'#b7950b'}
   };
-  // Draw circles as shapes
+  let traceNeither = {
+    x:[0.5], y:[0.5], text:`Neither: ${neither}`, mode:'text', showlegend:false, textfont:{size:16, color:'#7f8c8d'}
+  };
   let shapeA = {type:'circle', xref:'x', yref:'y', x0:0.7, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3}, fillcolor:'rgba(33,150,243,0.1)'};
   let shapeB = {type:'circle', xref:'x', yref:'y', x0:1.3, y0:1, x1:2.3, y1:2, line:{color:'#52be80', width:3}, fillcolor:'rgba(46,204,113,0.1)'};
-  Plotly.newPlot('venn-plot', [traceA, traceB, traceOverlap], {
-    title:"Venn Diagram",
+  Plotly.newPlot('venn-plot', [traceA, traceB, traceOverlap, traceNeither], {
+    title:"Venn Diagram with Neither",
     xaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
     yaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
     shapes:[shapeA, shapeB],
@@ -225,11 +289,12 @@ function drawVenn(){
 }
 function newVenn(){
   vennData = randomVennData();
+  vennData.neither = vennData.total - (vennData.Aonly + vennData.Bonly + vennData.overlap);
   drawVenn();
   document.getElementById('venn-desc').innerHTML =
     `<b>There are ${vennData.total} people in total.<br>
-    Set A has ${vennData.A} people.<br>
-    Set B has ${vennData.B} people.<br>
+    Set A has ${vennData.Aonly+vennData.overlap} people.<br>
+    Set B has ${vennData.Bonly+vennData.overlap} people.<br>
     Some are in both sets.</b>`;
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
