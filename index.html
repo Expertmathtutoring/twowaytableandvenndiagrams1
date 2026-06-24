@@ -2,195 +2,253 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stage 4 Indices Game</title>
+<title>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</title>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
-body { font-family: "Poppins", sans-serif; text-align: center; background: linear-gradient(135deg, #f0f4ff, #d0e8ff); margin:0; padding:0; }
-h1 { color:#333; margin-top:20px; }
-.tabs { display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0; }
-.tab { padding:10px 20px; margin:5px; background-color:#7bbcff; color:white; cursor:pointer; border-radius:8px; transition: background 0.3s; }
-.tab.active { background-color:#0055aa; }
-.content { display:none; margin-top:20px; }
-.content.active { display:block; }
-button { padding:10px 15px; margin:10px; border-radius:6px; border:none; background-color:#00aaff; color:white; cursor:pointer; font-size:16px; }
-button:hover { background-color:#0077aa; }
-.feedback { margin-top:15px; font-size:20px; font-weight:bold; }
-#fireworkCanvas { position: fixed; top:0; left:0; pointer-events:none; width:100%; height:100%; z-index:9999; }
+body { font-family: Arial, sans-serif; max-width: 840px; margin: 20px auto; background: #eef6fa; }
+h1, h2 { color: #2980b9; text-align: center; }
+.section { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #b1c7db4d; margin-bottom: 35px; padding: 20px; }
+.flex { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+.label { font-weight: bold; margin-right: 8px; }
+button { background: #2980b9; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; font-size: 1rem; cursor: pointer; margin-top: 12px; }
+button:hover { background: #21618c; }
+.input-small { width: 54px; }
+.correct { color: green; font-weight: bold; }
+.incorrect { color: red; font-weight: bold; }
+.table-wrap { overflow-x: auto; margin-top: 16px; }
+.table2 { border-collapse: collapse; width: 350px; background: #f9f9fa; }
+.table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+.table2 th { background: #d4e6f1; }
+.venn-wrap { width: 420px; height: 300px; margin: 0 auto;}
+@media (max-width: 600px){
+  .venn-wrap { width: 99vw; height: 220px;}
+  .table2 { width: 96vw;}
+  .flex { flex-direction: column; }
+}
 </style>
 </head>
 <body>
-<h1>🔥 Stage 4 Indices Game 🔥</h1>
+<h1>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</h1>
 
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('evaluate')">Evaluate</div>
-  <div class="tab" onclick="switchTab('simplify')">Simplify</div>
-  <div class="tab" onclick="switchTab('laws')">Apply Laws</div>
-  <div class="tab" onclick="switchTab('restart')">Restart</div>
+<div class="section" id="exclusive-section">
+  <h2>1. Mutually vs Non-Mutually Exclusive Events</h2>
+  <div class="flex">
+    <div>
+      <div id="event-desc"></div>
+      <button id="new-event">New Example</button>
+      <button id="reset-event">Reset</button>
+      <form id="exclusive-form" style="margin-top:12px;">
+        <label class="label">Are these events mutually exclusive?</label>
+        <input type="radio" name="exclusive" value="mutual" id="mutual" required>
+        <label for="mutual">Yes</label>
+        <input type="radio" name="exclusive" value="non-mutual" id="non-mutual">
+        <label for="non-mutual">No</label>
+        <button type="submit">Submit</button>
+      </form>
+      <div id="exclusive-feedback"></div>
+    </div>
+  </div>
 </div>
 
-<div id="evaluate" class="content active">
-  <h2>Evaluate the expression</h2>
-  <p id="question-evaluate"></p>
-  <div id="buttons-evaluate"></div>
-  <div class="feedback" id="feedback-evaluate"></div>
+<div class="section" id="table-section">
+  <h2>2. Two-way Table Activity</h2>
+  <div>
+    <div id="table-desc"></div>
+    <button id="new-table">New Table</button>
+    <button id="reset-table">Reset</button>
+    <div class="table-wrap">
+      <table class="table2" id="table2">
+        <tr>
+          <th></th>
+          <th id="colHead1"></th>
+          <th id="colHead2"></th>
+        </tr>
+        <tr>
+          <th id="rowHead1"></th>
+          <td><input class="input-small" id="cell11" type="number"></td>
+          <td><input class="input-small" id="cell12" type="number"></td>
+        </tr>
+        <tr>
+          <th id="rowHead2"></th>
+          <td><input class="input-small" id="cell21" type="number"></td>
+          <td><input class="input-small" id="cell22" type="number"></td>
+        </tr>
+      </table>
+    </div>
+    <button id="table-check">Submit Table</button>
+    <div id="table-feedback"></div>
+  </div>
 </div>
 
-<div id="simplify" class="content">
-  <h2>Simplify the expression</h2>
-  <p id="question-simplify"></p>
-  <div id="buttons-simplify"></div>
-  <div class="feedback" id="feedback-simplify"></div>
+<div class="section" id="venn-section">
+  <h2>3. Venn Diagram Interactive</h2>
+  <div>
+    <div id="venn-desc"></div>
+    <button id="new-venn">New Venn</button>
+    <button id="reset-venn">Reset</button>
+    <div class="venn-wrap" id="venn-plot"></div>
+    <form id="venn-form">
+      <label class="label">How many are in both sets (overlap)?</label>
+      <input type="number" id="venn-overlap" required>
+      <button type="submit">Submit Answer</button>
+    </form>
+    <div id="venn-feedback"></div>
+  </div>
 </div>
-
-<div id="laws" class="content">
-  <h2>Apply the law of indices</h2>
-  <p id="question-laws"></p>
-  <div id="buttons-laws"></div>
-  <div class="feedback" id="feedback-laws"></div>
-</div>
-
-<div id="restart" class="content">
-  <h2>Restart Game 🔄</h2>
-  <button onclick="restartGame()">Click to Restart All Questions</button>
-</div>
-
-<canvas id="fireworkCanvas"></canvas>
 
 <script>
-// Tab switching
-function switchTab(tabName) {
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById(tabName).classList.add('active');
-}
+// --- EVENTS ---
+const eventExamples = [
+  {desc:"Rolling a die: Event A is getting an even number, Event B is getting an odd number.", mutual:true},
+  {desc:"Drawing a card: Event A is getting a red card, Event B is getting a King.", mutual:false},
+  {desc:"Flipping a coin: Event A is getting heads, Event B is getting tails.", mutual:true},
+  {desc:"Picking a student: Event A is a girl, Event B is a student who wears glasses.", mutual:false},
+  {desc:"Choosing a day: Event A is a weekend, Event B is a day starting with 'S'.", mutual:false},
+  {desc:"Drawing a marble: Event A is blue, Event B is green.", mutual:true},
+  {desc:"Selecting a pet: Event A is a dog, Event B is a large animal.", mutual:false}
+];
 
-// Question banks with more variety
-const questions = {
-  evaluate: [
-    {q:"2³ × 2² = ?", options:[8,16,32], answer:32},
-    {q:"3² × 3³ = ?", options:[27,9,243], answer:243},
-    {q:"5² × 5⁴ = ?", options:[125,625,3125], answer:625},
-    {q:"2⁵ ÷ 2² = ?", options:[2,4,8], answer:8},
-    {q:"10⁰ × 5² = ?", options:[25,100,0], answer:25},
-    {q:"4³ ÷ 2² = ?", options:[2,8,16], answer:8},
-    {q:"6² × 6⁰ = ?", options:[6,36,1], answer:36}
-  ],
-  simplify: [
-    {q:"x³ × x² = ?", options:["x⁵","x⁶","x⁴"], answer:"x⁵"},
-    {q:"y⁵ ÷ y² = ?", options:["y³","y²","y⁷"], answer:"y³"},
-    {q:"a² × a⁴ = ?", options:["a⁶","a⁸","a²"], answer:"a⁶"},
-    {q:"b³ ÷ b³ = ?", options:["b⁰","b¹","b³"], answer:"b⁰"},
-    {q:"m⁰ × m⁴ = ?", options:["m⁴","m⁰","m¹"], answer:"m⁴"},
-    {q:"x⁵ ÷ x² × x³ = ?", options:["x⁶","x¹⁰","x³"], answer:"x⁶"},
-    {q:"p⁻² × p³ = ?", options:["p","p⁻⁵","p²"], answer:"p"}
-  ],
-  laws: [
-    {q:"(x³)² = ?", options:["x⁶","x⁹","x⁵"], answer:"x⁶"},
-    {q:"x³ × x⁻² = ?", options:["x","x⁻⁵","x⁵"], answer:"x"},
-    {q:"(y² × y³) ÷ y⁴ = ?", options:["y","y²","y³"], answer:"y"},
-    {q:"(a⁴)^(1/2) = ?", options:["a²","a⁴","a⁸"], answer:"a²"},
-    {q:"b⁰ × b⁵ = ?", options:["b⁵","b⁰","1"], answer:"b⁵"},
-    {q:"(2/3)³ = ?", options:["8/27","6/9","8/9"], answer:"8/27"},
-    {q:"(m²n³)² ÷ m³n = ?", options:["m¹n⁵","m⁴n⁵","m¹n⁴"], answer:"m¹n⁵"},
-    {q:"p⁻² × p³ ÷ p = ?", options:["p⁰","p²","p⁻²"], answer:"p⁰"},
-    {q:"(x⁴ ÷ x²)³ = ?", options:["x²","x⁶","x¹²"], answer:"x⁶"},
-    {q:"y³ × y⁻³ = ?", options:["1","y⁶","y⁰"], answer:"1"},
-    {q:"(a²b³)² ÷ (ab)³ = ?", options:["a¹b³","a¹b⁶","a⁴b³"], answer:"a¹b³"},
-    {q:"x⁰ × y⁰ = ?", options:["1","0","xy"], answer:"1"},
-    {q:"(2x³)² ÷ (4x²) = ?", options:["x⁴","x⁶","x²"], answer:"x⁴"},
-    {q:"(3x²)³ ÷ 9x³ = ?", options:["x³","x⁶","x²"], answer:"x³"},
-    {q:"(2a³b)² × a⁻²b² = ?", options:["4a⁴b⁴","4a²b⁴","4a⁶b³"], answer:"4a⁴b⁴"}
-  ]
+function newEventExample(){
+  const idx = Math.floor(Math.random()*eventExamples.length);
+  const example = eventExamples[idx];
+  document.getElementById('event-desc').innerHTML = "<b>"+example.desc+"</b>";
+  document.getElementById('exclusive-form').reset();
+  document.getElementById('exclusive-feedback').textContent = "";
+  exclusiveCurrent = example.mutual;
+}
+document.getElementById('new-event').onclick = newEventExample;
+document.getElementById('reset-event').onclick = function(){
+  document.getElementById('exclusive-form').reset();
+  document.getElementById('exclusive-feedback').textContent = "";
 };
-
-let currentIndex = {evaluate:0, simplify:0, laws:0};
-
-// Load question
-function loadQuestion(tab) {
-  let q = questions[tab][currentIndex[tab]];
-  document.getElementById(`question-${tab}`).innerHTML = q.q;
-  let buttonsHTML = "";
-  q.options.forEach(opt => buttonsHTML += `<button onclick="checkAnswer('${tab}','${opt}')">${opt}</button>`);
-  document.getElementById(`buttons-${tab}`).innerHTML = buttonsHTML;
-  document.getElementById(`feedback-${tab}`).innerHTML = "";
+let exclusiveCurrent=true;
+document.getElementById('exclusive-form').onsubmit = function(e){
+  e.preventDefault();
+  const val = document.querySelector('input[name="exclusive"]:checked');
+  const feedback = document.getElementById('exclusive-feedback');
+  if(val){
+    if((val.value === "mutual" && exclusiveCurrent) ||
+       (val.value === "non-mutual" && !exclusiveCurrent)){
+      feedback.innerHTML = "<span class='correct'>🎉 Correct!</span>";
+    } else {
+      feedback.innerHTML = "<span class='incorrect'>❌ Not correct. Try again!</span>";
+    }
+  }
 }
+newEventExample();
 
-// Check answer and move to next question
-function checkAnswer(tab, answer) {
-  let q = questions[tab][currentIndex[tab]];
-  let feedback = document.getElementById(`feedback-${tab}`);
-  
-  if(answer == q.answer) {
-    feedback.innerHTML = "🎉 Correct! Well done! 🎉";
-    feedback.style.color = "green";
-    launchFireworks();
+// --- TABLE ACTIVITY ---
+const tableExamples = [
+  {
+    desc:"Fill in the table for 'Favorite Fruit vs Likes Chocolate'.",
+    rowHeads:["Apple","Banana"], colHeads:["Likes Chocolate","Doesn't Like Chocolate"],
+    matrix:[[8,3],[5,4]]
+  },
+  {
+    desc:"Fill in the table for 'Season vs Likes Swimming'.",
+    rowHeads:["Summer","Winter"],colHeads:["Likes Swimming","Doesn't Like Swimming"],
+    matrix:[[10,2],[3,8]]
+  },
+  {
+    desc:"Fill in the table for 'Gender vs Likes Pizza'.",
+    rowHeads:["Boy","Girl"],colHeads:["Likes Pizza","Doesn't Like Pizza"],
+    matrix:[[9,4],[7,5]]
+  }
+];
+
+let tableIdx = 0;
+function newTableExample() {
+  tableIdx = Math.floor(Math.random()*tableExamples.length);
+  const ex = tableExamples[tableIdx];
+  document.getElementById('table-desc').innerHTML = "<b>"+ex.desc+"</b>";
+  document.getElementById('rowHead1').textContent = ex.rowHeads[0];
+  document.getElementById('rowHead2').textContent = ex.rowHeads[1];
+  document.getElementById('colHead1').textContent = ex.colHeads[0];
+  document.getElementById('colHead2').textContent = ex.colHeads[1];
+  ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById('table-feedback').textContent = "";
+}
+document.getElementById('new-table').onclick=newTableExample;
+document.getElementById('reset-table').onclick=function(){
+  ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById('table-feedback').textContent = "";
+};
+document.getElementById('table-check').onclick=function(){
+  const ex = tableExamples[tableIdx];
+  let correct = true;
+  correct &= (parseInt(document.getElementById('cell11').value) === ex.matrix[0][0]);
+  correct &= (parseInt(document.getElementById('cell12').value) === ex.matrix[0][1]);
+  correct &= (parseInt(document.getElementById('cell21').value) === ex.matrix[1][0]);
+  correct &= (parseInt(document.getElementById('cell22').value) === ex.matrix[1][1]);
+  const feedback = document.getElementById('table-feedback');
+  if(correct){
+    feedback.innerHTML = "<span class='correct'>🎉 Correct!</span>";
+  }else{
+    feedback.innerHTML = "<span class='incorrect'>❌ Some values are not correct. Try again!</span>";
+  }
+};
+newTableExample();
+
+// --- VENN DIAGRAM ---
+function randomVennData(){
+  // Simple random values for sets
+  let total = Math.floor(Math.random()*18)+12; // 12 to 29
+  let A = Math.floor(Math.random()*total/2)+4; // 4 to half of total
+  let B = Math.floor(Math.random()*total/2)+4;
+  let overlap = Math.floor(Math.min(A,B)/2)+1; // at least 1 in the overlap, at most min(A,B)/2
+  return {total, A, B, overlap};
+}
+let vennData = randomVennData();
+
+function drawVenn(){
+  const {A,B,overlap,total} = vennData;
+  // Plotly traces for Venn circles
+  let traceA = {
+    x:[1], y:[1.5], text:`A<br>${A}`, mode:'text', name:'A', textfont:{size:20}, showlegend:false
+  };
+  let traceB = {
+    x:[2], y:[1.5], text:`B<br>${B}`, mode:'text', name:'B', textfont:{size:20}, showlegend:false
+  };
+  let traceOverlap = {
+    x:[1.5], y:[1.5], text:`Overlap<br>${overlap}`,mode:'text', name:'Overlap', textfont:{size:18}, showlegend:false
+  };
+  // Draw circles as shapes
+  let shapeA = {type:'circle', xref:'x', yref:'y', x0:0.7, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3}, fillcolor:'rgba(33,150,243,0.1)'};
+  let shapeB = {type:'circle', xref:'x', yref:'y', x0:1.3, y0:1, x1:2.3, y1:2, line:{color:'#52be80', width:3}, fillcolor:'rgba(46,204,113,0.1)'};
+  Plotly.newPlot('venn-plot', [traceA, traceB, traceOverlap], {
+    title:"Venn Diagram",
+    xaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
+    yaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
+    shapes:[shapeA, shapeB],
+    margin:{t:60,l:0,r:0,b:0}
+  });
+}
+function newVenn(){
+  vennData = randomVennData();
+  drawVenn();
+  document.getElementById('venn-desc').innerHTML =
+    `<b>There are ${vennData.total} people in total.<br>
+    Set A has ${vennData.A} people.<br>
+    Set B has ${vennData.B} people.<br>
+    Some are in both sets.</b>`;
+  document.getElementById('venn-form').reset();
+  document.getElementById('venn-feedback').textContent = "";
+}
+document.getElementById('new-venn').onclick=newVenn;
+document.getElementById('reset-venn').onclick=function(){
+  document.getElementById('venn-form').reset();
+  document.getElementById('venn-feedback').textContent = "";
+};
+document.getElementById('venn-form').onsubmit=function(e){
+  e.preventDefault();
+  const guess = parseInt(document.getElementById('venn-overlap').value);
+  if(guess === vennData.overlap){
+    document.getElementById('venn-feedback').innerHTML = "<span class='correct'>🎉 Correct!</span>";
   } else {
-    feedback.innerHTML = "❌ Try again!";
-    feedback.style.color = "red";
+    document.getElementById('venn-feedback').innerHTML = "<span class='incorrect'>❌ Not right. Try again!</span>";
   }
-  
-  setTimeout(() => {
-    currentIndex[tab]++;
-    if(currentIndex[tab]>=questions[tab].length) currentIndex[tab]=0;
-    loadQuestion(tab);
-  }, 1500);
-}
-
-// Restart game
-function restartGame() {
-  currentIndex = {evaluate:0, simplify:0, laws:0};
-  loadQuestion('evaluate');
-  loadQuestion('simplify');
-  loadQuestion('laws');
-  alert("All questions have been reset! ✅");
-  switchTab('evaluate');
-}
-
-// Initialize
-loadQuestion('evaluate');
-loadQuestion('simplify');
-loadQuestion('laws');
-
-// Fireworks
-const canvas = document.getElementById('fireworkCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-function launchFireworks() {
-  for(let i=0;i<30;i++) createParticle(Math.random()*canvas.width, Math.random()*canvas.height/2);
-}
-
-function createParticle(x, y) {
-  const colors = ["#ff0044","#ff9900","#00ff99","#00ccff","#ff00ff"];
-  let particles = [];
-  for(let i=0;i<50;i++){
-    particles.push({x:x,y:y,dx:(Math.random()-0.5)*6,dy:(Math.random()-0.5)*6,color:colors[Math.floor(Math.random()*colors.length)],alpha:1});
-  }
-  animateParticles(particles);
-}
-
-function animateParticles(particles) {
-  let interval = setInterval(() => {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    let done=true;
-    particles.forEach(p=>{
-      if(p.alpha>0){
-        done=false;
-        ctx.fillStyle=p.color;
-        ctx.globalAlpha=p.alpha;
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,3,0,2*Math.PI);
-        ctx.fill();
-        p.x+=p.dx;
-        p.y+=p.dy;
-        p.alpha-=0.02;
-      }
-    });
-    if(done) clearInterval(interval);
-  },30);
-}
+};
+newVenn();
 </script>
 </body>
 </html>
