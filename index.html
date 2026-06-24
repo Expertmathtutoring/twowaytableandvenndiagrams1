@@ -201,16 +201,15 @@ let tableIdx = 0;
 
 function parseCellValue(id) {
   const raw = document.getElementById(id).value;
-  if(raw === null || raw.trim() === "") return null;
-  if(!/^\d+$/.test(raw.trim())) return NaN;
+  if(raw === null || raw.trim() === "") return 0;
+  if(!/^\d+$/.test(raw.trim())) return 0;
   return parseInt(raw.trim(),10);
 }
-
 function updateTotals() {
-  const c11 = parseCellValue('cell11') || 0;
-  const c12 = parseCellValue('cell12') || 0;
-  const c21 = parseCellValue('cell21') || 0;
-  const c22 = parseCellValue('cell22') || 0;
+  const c11 = parseCellValue('cell11');
+  const c12 = parseCellValue('cell12');
+  const c21 = parseCellValue('cell21');
+  const c22 = parseCellValue('cell22');
 
   const row1Total = c11 + c12;
   const row2Total = c21 + c22;
@@ -238,7 +237,6 @@ function newTableExample() {
   });
   updateTotals();
   document.getElementById('table-feedback').textContent = "";
-  // Clear the venn diagram plot and description from previous
   document.getElementById('venn-desc').textContent = "";
   Plotly.purge('venn-plot');
   document.getElementById('venn-feedback').textContent = "";
@@ -286,7 +284,6 @@ function drawVennFromTable(A, B, overlap, total, labelA, labelB) {
     margin:{t:60,l:0,r:0,b:0}
   });
 
-  // Update Venn description area
   document.getElementById('venn-desc').innerHTML =
     `<b>Total: ${total}<br>
     ${labelA}: ${A}<br>
@@ -294,80 +291,24 @@ function drawVennFromTable(A, B, overlap, total, labelA, labelB) {
     Overlap: ${overlap}</b>`;
 }
 
-// Modified submit handler for two-way table
 document.getElementById('table-check').onclick = function(){
-  const inputs = ['cell11','cell12','cell21','cell22'];
-  const feedback = document.getElementById('table-feedback');
-  for(const id of inputs){
-    const val = parseCellValue(id);
-    if(val === null) {
-      feedback.innerHTML = "<span class='incorrect'>❌ Please fill out all table cells.</span>";
-      return;
-    }
-    if(isNaN(val)){
-      feedback.innerHTML = "<span class='incorrect'>❌ Please enter valid non-negative integers (no decimals).</span>";
-      return;
-    }
-  }
   updateTotals();
+  document.getElementById('table-feedback').textContent = ""; // No correct/incorrect feedback
 
-  const ex = tableExamples[tableIdx];
-  const c11 = parseCellValue('cell11');
-  const c12 = parseCellValue('cell12');
-  const c21 = parseCellValue('cell21');
-  const c22 = parseCellValue('cell22');
+  const A = Number(document.getElementById('rowTotal1').value);
+  const B = Number(document.getElementById('colTotal1').value);
+  const overlap = parseCellValue('cell11');
+  const total = Number(document.getElementById('grandTotal').value);
+  const labelA = document.getElementById('rowHead1').textContent;
+  const labelB = document.getElementById('colHead1').textContent;
 
-  let correct = 
-    (c11 === ex.matrix[0][0]) &&
-    (c12 === ex.matrix[0][1]) &&
-    (c21 === ex.matrix[1][0]) &&
-    (c22 === ex.matrix[1][1]);
-
-  const expectedRow1 = ex.matrix[0][0] + ex.matrix[0][1];
-  const expectedRow2 = ex.matrix[1][0] + ex.matrix[1][1];
-  const expectedCol1 = ex.matrix[0][0] + ex.matrix[1][0];
-  const expectedCol2 = ex.matrix[0][1] + ex.matrix[1][1];
-  const expectedGrand = expectedRow1 + expectedRow2;
-
-  correct = correct &&
-    (Number(document.getElementById('rowTotal1').value) === expectedRow1) &&
-    (Number(document.getElementById('rowTotal2').value) === expectedRow2) &&
-    (Number(document.getElementById('colTotal1').value) === expectedCol1) &&
-    (Number(document.getElementById('colTotal2').value) === expectedCol2) &&
-    (Number(document.getElementById('grandTotal').value) === expectedGrand);
-
-  if(correct){
-    feedback.innerHTML = "<span class='correct'>🎉 Correct! All values including totals match.</span>";
-
-    // Calculate values for venn diagram from table data:
-    // Set A: sum of first row = rowTotal1
-    // Set B: sum of first column = colTotal1
-    // Overlap = cell11 (top-left cell)
-    // Total: grandTotal
-    const A = Number(document.getElementById('rowTotal1').value);
-    const B = Number(document.getElementById('colTotal1').value);
-    const overlap = c11;
-    const total = Number(document.getElementById('grandTotal').value);
-    const labelA = document.getElementById('rowHead1').textContent;
-    const labelB = document.getElementById('colHead1').textContent;
-
-    drawVennFromTable(A, B, overlap, total, labelA, labelB);
-
-    // Show Venn hint for clarity
-    document.getElementById('hint-venn').style.display = 'block';
-  } else {
-    feedback.innerHTML = "<span class='incorrect'>❌ Some values or totals are not correct. Try again!</span>";
-    // Clear venn diagram if incorrect to avoid confusion
-    document.getElementById('venn-desc').textContent = "";
-    Plotly.purge('venn-plot');
-    document.getElementById('venn-feedback').textContent = "";
-    document.getElementById('hint-venn').style.display = 'none';
-  }
+  drawVennFromTable(A, B, overlap, total, labelA, labelB);
+  document.getElementById('hint-venn').style.display = 'block';
 };
 
 // --- Existing VENN DIAGRAM --- (unchanged)
 function randomVennData(){
-  let total = Math.floor(Math.random()*18)+12; 
+  let total = Math.floor(Math.random()*18)+12;
   let A = Math.floor(Math.random()*total/2)+4;
   let B = Math.floor(Math.random()*total/2)+4;
   let overlap = Math.floor(Math.min(A,B)/2)+1;
