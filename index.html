@@ -20,7 +20,13 @@ button:hover { background: #21618c; }
 .table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; }
 .table2 th { background: #d4e6f1; }
 .table2 input[readonly] { background: #e1e8f0; }
-.venn-wrap, .venn-table-wrap { width: 420px; height: 300px; margin: 0 auto;}
+.venn-wrap, .venn-table-wrap { width: 420px; height: 320px; margin: 0 auto;}
+.venn-table-legend { width: 420px; margin:0 auto; margin-bottom: 12px;}
+.venn-table-legend span { display:inline-block; margin-right:12px; padding:2px 10px; border-radius:5px;}
+.venn-table-legend .onlyA { background:#85c1e9; }
+.venn-table-legend .onlyB { background:#abebc6;}
+.venn-table-legend .both { background:#f7ca18; }
+.venn-table-legend .neither { background:#d5dbdb; }
 .hint-box {
   background: #d9edf7;
   border-left: 5px solid #31708f;
@@ -33,6 +39,7 @@ button:hover { background: #21618c; }
 }
 @media (max-width: 600px){
   .venn-wrap, .venn-table-wrap { width: 99vw; height: 220px;}
+  .venn-table-legend { width:99vw;}
   .table2 { width: 96vw;}
   .flex { flex-direction: column; }
 }
@@ -105,8 +112,14 @@ button:hover { background: #21618c; }
     </div>
     <button id="table-check">Submit Table</button>
     <div id="table-feedback"></div>
+    <div class="venn-table-legend">
+      <span class="onlyA">Only A</span>
+      <span class="onlyB">Only B</span>
+      <span class="both">Both A & B</span>
+      <span class="neither">Neither</span>
+    </div>
     <div id="table-desc-venn"></div>
-    <div class="venn-table-wrap" id="venn-table-plot" role="img" aria-label="Venn diagram from table"></div>
+    <div class="venn-table-wrap" id="venn-table-plot" role="img" aria-label="Full Venn diagram from table"></div>
   </div>
 </div>
 
@@ -239,7 +252,6 @@ function newTableExample() {
   document.getElementById('rowHead2').textContent = ex.rowHeads[1];
   document.getElementById('colHead1').textContent = ex.colHeads[0];
   document.getElementById('colHead2').textContent = ex.colHeads[1];
-  // Fill table with blanks
   ['cell11','cell12','cell21','cell22'].forEach((id) => {
     document.getElementById(id).value = "";
   });
@@ -262,57 +274,87 @@ document.getElementById('reset-table').onclick = function(){
   Plotly.purge('venn-table-plot');
 };
 
-function drawVennFromTable(A, B, overlap, total, labelA, labelB) {
-  let traceA = {
-    x:[1], y:[1.5], text:`${labelA}<br>${A}`, mode:'text', textfont:{size:20}, showlegend:false
-  };
-  let traceB = {
-    x:[2], y:[1.5], text:`${labelB}<br>${B}`, mode:'text', textfont:{size:20}, showlegend:false
-  };
-  let traceOverlap = {
-    x:[1.5], y:[1.5], text:`Overlap<br>${overlap}`,mode:'text', textfont:{size:18}, showlegend:false
+/**
+ * Draws a full Venn diagram including complements: only A, only B, both, neither.
+ */
+function drawVennFull(a, b, c, d, total, labelA, labelB){
+  // Position logic:
+  // - Only A: in left circle but not overlap
+  // - Only B: in right circle but not overlap
+  // - Both: overlap
+  // - Neither: outside
+  const regionLabels = {
+    onlyA: labelA + " only",
+    onlyB: labelB + " only",
+    both: "Both",
+    neither: "Neither"
   };
 
-  let shapeA = {type:'circle', xref:'x', yref:'y', x0:0.7, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3}, fillcolor:'rgba(33,150,243,0.1)'};
-  let shapeB = {type:'circle', xref:'x', yref:'y', x0:1.3, y0:1, x1:2.3, y1:2, line:{color:'#52be80', width:3}, fillcolor:'rgba(46,204,113,0.1)'};
+  let textAnnotations = [
+    {
+      x:1, y:2.1, text: `Only ${labelA}: ${b}`, font:{size:15, color:'#2980b9'},
+      showarrow:false, bgcolor:'#85c1e9', borderpad:3
+    },
+    {
+      x:1.95, y:2.1, text: `Only ${labelB}: ${c}`, font:{size:15, color:'#27ae60'},
+      showarrow:false, bgcolor:'#abebc6', borderpad:3
+    },
+    {
+      x:1.48, y:1.6, text: `Both: ${a}`, font:{size:15, color:'#b7950b'},
+      showarrow:false, bgcolor:'#f7ca18', borderpad:4
+    },
+    {
+      x:0.45, y:0.65, text: `Neither: ${d}`, font:{size:14, color:'#616161'},
+      showarrow:false, bgcolor:'#d5dbdb', borderpad:4
+    }
+  ];
 
-  Plotly.newPlot('venn-table-plot', [traceA, traceB, traceOverlap], {
-    title:`Venn Diagram of ${labelA} and ${labelB} (Total: ${total})`,
-    xaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
-    yaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
-    shapes:[shapeA, shapeB],
-    margin:{t:60,l:0,r:0,b:0}
-  });
+  // Circle shapes
+  let shapeA = {
+    type:'circle', xref:'x', yref:'y', x0:0.8, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3},
+    fillcolor:'rgba(33,150,243,0.12)'
+  };
+  let shapeB = {
+    type:'circle', xref:'x', yref:'y', x0:1.25, y0:1, x1:2.15, y1:2, line:{color:'#52be80', width:3},
+    fillcolor:'rgba(46,204,113,0.09)'
+  };
+
+  Plotly.newPlot('venn-table-plot', [],
+    {
+      title:`Venn Diagram for ${labelA} & ${labelB} (Total: ${total})`,
+      xaxis:{range:[0,2.4], showgrid:false, zeroline:false, showticklabels:false},
+      yaxis:{range:[0,2.5], showgrid:false, zeroline:false, showticklabels:false},
+      shapes:[shapeA, shapeB],
+      margin:{t:60,l:0,r:0,b:0},
+      annotations:textAnnotations
+    }, {displayModeBar:false}
+  );
 
   document.getElementById('table-desc-venn').innerHTML =
     `<b>Total: ${total}<br>
-    ${labelA}: ${A}<br>
-    ${labelB}: ${B}<br>
-    Overlap: ${overlap}</b>`;
+    Only ${labelA}: ${b}<br>
+    Only ${labelB}: ${c}<br>
+    Both: ${a}<br>
+    Neither: ${d}</b>`;
 }
 
 document.getElementById('table-check').onclick = function(){
-  // Get values from preset matrix if table fields are empty, else from fields
-  let c11 = parseCellValue('cell11');
-  let c12 = parseCellValue('cell12');
-  let c21 = parseCellValue('cell21');
-  let c22 = parseCellValue('cell22');
+  // Values: cell11 = a, cell12 = b, cell21 = c, cell22 = d
+  let a = parseCellValue('cell11');
+  let b = parseCellValue('cell12');
+  let c = parseCellValue('cell21');
+  let d = parseCellValue('cell22');
   // If all fields empty, use preset
   if(['cell11','cell12','cell21','cell22'].every(id => document.getElementById(id).value === "")){
-    c11 = tablePreset.matrix[0][0];
-    c12 = tablePreset.matrix[0][1];
-    c21 = tablePreset.matrix[1][0];
-    c22 = tablePreset.matrix[1][1];
+    a = tablePreset.matrix[0][0];
+    b = tablePreset.matrix[0][1];
+    c = tablePreset.matrix[1][0];
+    d = tablePreset.matrix[1][1];
   }
-  // Interpret as Venn
-  const A = c11 + c12;
-  const B = c11 + c21;
-  const overlap = c11;
-  const total = c11 + c12 + c21 + c22;
+  const total = a + b + c + d;
   const labelA = document.getElementById('rowHead1').textContent;
   const labelB = document.getElementById('colHead1').textContent;
-
-  drawVennFromTable(A, B, overlap, total, labelA, labelB);
+  drawVennFull(a, b, c, d, total, labelA, labelB);
 };
 
 // --- VENN DIAGRAM ACTIVITY 3--- (unchanged)
