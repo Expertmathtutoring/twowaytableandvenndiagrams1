@@ -37,6 +37,7 @@ button:hover { background: #21618c; }
   border-radius: 4px;
   color: #31708f;
 }
+.summary-top { font-size:1.1em; margin:12px 0; color:#2980b9; }
 @media (max-width: 600px){
   .venn-wrap, .venn-table-wrap { width: 99vw; height: 220px;}
   .venn-table-legend { width:99vw;}
@@ -75,7 +76,8 @@ button:hover { background: #21618c; }
 <div class="section" id="table-section">
   <h2>2. Two-way Table Activity</h2>
   <div>
-    <div id="table-desc"></div>
+    <div id="table-question"></div>
+    <div class="summary-top" id="table-summary-top"></div>
     <button id="show-hint-table" type="button">Show Hint</button>
     <div id="hint-table" class="hint-box">
       <strong>Hint:</strong> Read carefully the categories for rows and columns. Fill in the table by entering the number of individuals in each group. Double check if the sum of rows and columns make logical sense.
@@ -113,9 +115,9 @@ button:hover { background: #21618c; }
     <button id="table-check">Submit Table</button>
     <div id="table-feedback"></div>
     <div class="venn-table-legend">
-      <span class="onlyA">Only A</span>
-      <span class="onlyB">Only B</span>
-      <span class="both">Both A & B</span>
+      <span class="onlyA">Only <span id="onlyAName"></span></span>
+      <span class="onlyB">Only <span id="onlyBName"></span></span>
+      <span class="both">Both</span>
       <span class="neither">Neither</span>
     </div>
     <div id="table-desc-venn"></div>
@@ -198,18 +200,21 @@ document.getElementById('show-hint-exclusive').onclick = function(){
 const tableExamples = [
   {
     desc:"Fill in the table for 'Favorite Fruit vs Likes Chocolate'.",
+    question:"Below is a survey of students' favorite fruit and whether they like chocolate. Complete the table.",
     rowHeads:["Apple","Banana"], 
     colHeads:["Likes Chocolate","Doesn't Like Chocolate"],
     matrix:[[8,3],[5,4]]
   },
   {
     desc:"Fill in the table for 'Season vs Likes Swimming'.",
+    question:"Here is a survey by season and whether students like swimming.",
     rowHeads:["Summer","Winter"],
     colHeads:["Likes Swimming","Doesn't Like Swimming"],
     matrix:[[10,2],[3,8]]
   },
   {
     desc:"Fill in the table for 'Gender vs Likes Pizza'.",
+    question:"Here is a survey by gender and whether students like pizza.",
     rowHeads:["Boy","Girl"],
     colHeads:["Likes Pizza","Doesn't Like Pizza"],
     matrix:[[9,4],[7,5]]
@@ -225,37 +230,55 @@ function parseCellValue(id) {
   return parseInt(raw.trim(),10);
 }
 function updateTotals() {
-  const c11 = parseCellValue('cell11');
-  const c12 = parseCellValue('cell12');
-  const c21 = parseCellValue('cell21');
-  const c22 = parseCellValue('cell22');
+  // Get data from student's input
+  const a = parseCellValue('cell11'), b = parseCellValue('cell12'),
+        c = parseCellValue('cell21'), d = parseCellValue('cell22');
 
-  const row1Total = c11 + c12;
-  const row2Total = c21 + c22;
-  const col1Total = c11 + c21;
-  const col2Total = c12 + c22;
-  const grandTotal = row1Total + row2Total;
+  document.getElementById('rowTotal1').value = a + b;
+  document.getElementById('rowTotal2').value = c + d;
+  document.getElementById('colTotal1').value = a + c;
+  document.getElementById('colTotal2').value = b + d;
+  document.getElementById('grandTotal').value = a + b + c + d;
+}
 
-  document.getElementById('rowTotal1').value = row1Total;
-  document.getElementById('rowTotal2').value = row2Total;
-  document.getElementById('colTotal1').value = col1Total;
-  document.getElementById('colTotal2').value = col2Total;
-  document.getElementById('grandTotal').value = grandTotal;
+['cell11','cell12','cell21','cell22'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateTotals);
+});
+
+function showTableSummary(a, b, c, d, labelA, labelB) {
+  // Only A: b, Only B: c, Both: a, Neither: d
+  const setA = a + b;
+  const setB = a + c;
+  const total = a + b + c + d;
+  let s = `<b>Total: ${total} people</b><br>
+    <b>${labelA} only:</b> ${b}<br>
+    <b>${labelB} only:</b> ${c}<br>
+    <b>Both:</b> ${a}<br>
+    <b>Neither:</b> ${d}<br>
+    <b>${labelA} (only or both):</b> ${setA}<br>
+    <b>${labelB} (only or both):</b> ${setB}`;
+  document.getElementById('table-summary-top').innerHTML = s;
+  document.getElementById('onlyAName').textContent = labelA;
+  document.getElementById('onlyBName').textContent = labelB;
 }
 
 function newTableExample() {
   tableIdx = Math.floor(Math.random()*tableExamples.length);
   tablePreset = tableExamples[tableIdx];
   const ex = tablePreset;
+  document.getElementById('table-question').innerHTML = `<b>${ex.question}</b>`;
   document.getElementById('table-desc').innerHTML = "<b>"+ex.desc+"</b>";
   document.getElementById('rowHead1').textContent = ex.rowHeads[0];
   document.getElementById('rowHead2').textContent = ex.rowHeads[1];
   document.getElementById('colHead1').textContent = ex.colHeads[0];
   document.getElementById('colHead2').textContent = ex.colHeads[1];
-  ['cell11','cell12','cell21','cell22'].forEach((id) => {
+  ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach((id) => {
     document.getElementById(id).value = "";
   });
   updateTotals();
+  // Show summary based on preset matrix
+  let a = ex.matrix[0][0], b = ex.matrix[0][1], c = ex.matrix[1][0], d = ex.matrix[1][1];
+  showTableSummary(a,b,c,d, ex.rowHeads[0], ex.colHeads[0]);
   document.getElementById('table-feedback').textContent = "";
   document.getElementById('table-desc-venn').textContent = "";
   Plotly.purge('venn-table-plot');
@@ -268,27 +291,20 @@ document.getElementById('reset-table').onclick = function(){
     document.getElementById(id).value = "";
   });
   updateTotals();
+  // Show summary based on preset matrix
+  let a = tablePreset.matrix[0][0], b = tablePreset.matrix[0][1],
+      c = tablePreset.matrix[1][0], d = tablePreset.matrix[1][1];
+  showTableSummary(a,b,c,d, tablePreset.rowHeads[0], tablePreset.colHeads[0]);
   document.getElementById('table-feedback').textContent = "";
   document.getElementById('hint-table').style.display = "none";
   document.getElementById('table-desc-venn').textContent = "";
   Plotly.purge('venn-table-plot');
 };
 
-/**
- * Draws a full Venn diagram including complements: only A, only B, both, neither.
- */
-function drawVennFull(a, b, c, d, total, labelA, labelB){
-  // Position logic:
-  // - Only A: in left circle but not overlap
-  // - Only B: in right circle but not overlap
-  // - Both: overlap
-  // - Neither: outside
-  const regionLabels = {
-    onlyA: labelA + " only",
-    onlyB: labelB + " only",
-    both: "Both",
-    neither: "Neither"
-  };
+function drawVennFull(a, b, c, d, labelA, labelB){
+  // Only A: b, Only B: c, Both: a, Neither: d
+  const setA = a + b, setB = a + c;
+  const total = a + b + c + d;
 
   let textAnnotations = [
     {
@@ -296,7 +312,7 @@ function drawVennFull(a, b, c, d, total, labelA, labelB){
       showarrow:false, bgcolor:'#85c1e9', borderpad:3
     },
     {
-      x:1.95, y:2.1, text: `Only ${labelB}: ${c}`, font:{size:15, color:'#27ae60'},
+      x:2, y:2.1, text: `Only ${labelB}: ${c}`, font:{size:15, color:'#27ae60'},
       showarrow:false, bgcolor:'#abebc6', borderpad:3
     },
     {
@@ -309,7 +325,6 @@ function drawVennFull(a, b, c, d, total, labelA, labelB){
     }
   ];
 
-  // Circle shapes
   let shapeA = {
     type:'circle', xref:'x', yref:'y', x0:0.8, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3},
     fillcolor:'rgba(33,150,243,0.12)'
@@ -335,26 +350,25 @@ function drawVennFull(a, b, c, d, total, labelA, labelB){
     Only ${labelA}: ${b}<br>
     Only ${labelB}: ${c}<br>
     Both: ${a}<br>
-    Neither: ${d}</b>`;
+    Neither: ${d}<br>
+    ${labelA} (only or both): ${setA}<br>
+    ${labelB} (only or both): ${setB}</b>`;
 }
 
 document.getElementById('table-check').onclick = function(){
-  // Values: cell11 = a, cell12 = b, cell21 = c, cell22 = d
-  let a = parseCellValue('cell11');
-  let b = parseCellValue('cell12');
-  let c = parseCellValue('cell21');
-  let d = parseCellValue('cell22');
-  // If all fields empty, use preset
+  // Use student input if present, else preset
+  let a = parseCellValue('cell11'), b = parseCellValue('cell12'),
+      c = parseCellValue('cell21'), d = parseCellValue('cell22');
   if(['cell11','cell12','cell21','cell22'].every(id => document.getElementById(id).value === "")){
-    a = tablePreset.matrix[0][0];
-    b = tablePreset.matrix[0][1];
-    c = tablePreset.matrix[1][0];
-    d = tablePreset.matrix[1][1];
+    a = tablePreset.matrix[0][0]; b = tablePreset.matrix[0][1];
+    c = tablePreset.matrix[1][0]; d = tablePreset.matrix[1][1];
   }
-  const total = a + b + c + d;
   const labelA = document.getElementById('rowHead1').textContent;
   const labelB = document.getElementById('colHead1').textContent;
-  drawVennFull(a, b, c, d, total, labelA, labelB);
+
+  updateTotals();
+  showTableSummary(a,b,c,d,labelA,labelB);
+  drawVennFull(a,b,c,d,labelA,labelB);
 };
 
 // --- VENN DIAGRAM ACTIVITY 3--- (unchanged)
