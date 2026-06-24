@@ -40,6 +40,8 @@ button:hover { background: #21618c; }
 .summary-top, .venn-summary-top { font-size:1.1em; margin:12px 0; color:#2980b9; }
 .var-label-row { margin-top:10px; font-weight:bold; color:#2980b9; }
 .var-label-col { margin-bottom:10px; font-weight:bold; color:#2980b9; }
+.colsubtitle { font-size:0.97em; color:#56606a; }
+.rowsubtitle { font-size:0.97em; color:#56606a; }
 @media (max-width: 600px){
   .venn-wrap, .venn-table-wrap { width: 99vw; height: 220px;}
   .venn-table-legend, .venn-legend { width:99vw;}
@@ -115,6 +117,13 @@ button:hover { background: #21618c; }
           <td><input class="input-small" id="grandTotal" type="number" readonly></td>
         </tr>
       </table>
+      <div style="margin-top:3px;">
+        <span class="rowsubtitle" id="rowsubtitle1"></span> | 
+        <span class="rowsubtitle" id="rowsubtitle2"></span>
+        <br>
+        <span class="colsubtitle" id="colsubtitle1"></span> | 
+        <span class="colsubtitle" id="colsubtitle2"></span>
+      </div>
     </div>
     <button id="table-check">Submit Table</button>
     <div id="table-feedback"></div>
@@ -166,6 +175,8 @@ const tableExamples = [
     question:"Below is a survey of students' favorite fruit and whether they like chocolate. Complete the table.",
     rowHeads:["Apple","Banana"], 
     colHeads:["Likes Chocolate","Doesn't Like Chocolate"],
+    rowSubtitles:["Fruit: Apple","Fruit: Banana"],
+    colSubtitles:["Chocolate: Liked","Chocolate: Not liked"],
     matrix:[[8,3],[5,4]]
   },
   {
@@ -173,6 +184,8 @@ const tableExamples = [
     question:"Here is a survey by season and whether students like swimming.",
     rowHeads:["Summer","Winter"],
     colHeads:["Likes Swimming","Doesn't Like Swimming"],
+    rowSubtitles:["Season: Summer","Season: Winter"],
+    colSubtitles:["Swimming: Likes","Swimming: Doesn't like"],
     matrix:[[10,2],[3,8]]
   },
   {
@@ -180,6 +193,8 @@ const tableExamples = [
     question:"Here is a survey by gender and whether students like pizza.",
     rowHeads:["Boy","Girl"],
     colHeads:["Likes Pizza","Doesn't Like Pizza"],
+    rowSubtitles:["Gender: Boy","Gender: Girl"],
+    colSubtitles:["Pizza: Likes","Pizza: Doesn't like"],
     matrix:[[9,4],[7,5]]
   }
 ];
@@ -196,25 +211,27 @@ function parseCellValue(id) {
 function updateTotals() {
   const a = parseCellValue('cell11'), b = parseCellValue('cell12'),
         c = parseCellValue('cell21'), d = parseCellValue('cell22');
-
   document.getElementById('rowTotal1').value = a + b;
   document.getElementById('rowTotal2').value = c + d;
   document.getElementById('colTotal1').value = a + c;
   document.getElementById('colTotal2').value = b + d;
   document.getElementById('grandTotal').value = a + b + c + d;
 }
-
 ['cell11','cell12','cell21','cell22'].forEach(id => {
   document.getElementById(id).addEventListener('input', updateTotals);
 });
 
 function showTableSummary(a, b, c, d, labelA, labelB) {
+  // Only A: b, Only B: c, Both: a, Neither: d
   const setAonly = b, setBonly = c, overlap = a, neither = d;
+  // Total: Only A + Only B + Neither (excluding overlap)
+  const total = setAonly + setBonly + neither;
+  const totalWithOverlap = setAonly + setBonly + overlap + neither;
   const setA = setAonly + overlap;
   const setB = setBonly + overlap;
-  const total = setAonly + setBonly + overlap + neither;
   document.getElementById('table-summary-top').innerHTML =
-    `<b>Total:</b> ${total} | <b>${labelA} only:</b> ${setAonly} | <b>${labelB} only:</b> ${setBonly} | <b>Overlap:</b> ${overlap} | <b>Neither:</b> ${neither} | <b>${labelA} total:</b> ${setA} | <b>${labelB} total:</b> ${setB}`;
+    `<b>Total (excluding overlap):</b> ${total} | <b>${labelA} only:</b> ${setAonly} | <b>${labelB} only:</b> ${setBonly} | <b>Overlap:</b> ${overlap} | <b>Neither:</b> ${neither} | <b>${labelA} total:</b> ${setA} | <b>${labelB} total:</b> ${setB}<br>
+    <span style='font-size:0.93em;color:#56606a;'>Total including overlap: ${totalWithOverlap}</span>`;
   document.getElementById('onlyAName').textContent = labelA;
   document.getElementById('onlyBName').textContent = labelB;
 }
@@ -224,9 +241,19 @@ function showVarLabels(rowLabel, colLabel) {
   document.getElementById('table-col-label').innerHTML = 'Columns = <b>' + colLabel + '</b>';
 }
 
+function showSubtitles(rowSubs, colSubs){
+  document.getElementById('rowsubtitle1').textContent = rowSubs[0];
+  document.getElementById('rowsubtitle2').textContent = rowSubs[1];
+  document.getElementById('colsubtitle1').textContent = colSubs[0];
+  document.getElementById('colsubtitle2').textContent = colSubs[1];
+}
+
 function drawVennFull(a, b, c, d, labelA, labelB, plotDivId, titleTag) {
   const setA = b + a, setB = c + a;
-  const total = a + b + c + d;
+  // Only A: b, Only B: c, Both: a, Neither: d
+  // Total (excluding overlap)
+  const total = b + c + d;
+  const totalWithOverlap = b + c + a + d;
   let textAnnotations = [
     {x:1, y:2.1, text: `Only ${labelA}: ${b}`, font:{size:15, color:'#2980b9'}, showarrow:false, bgcolor:'#85c1e9', borderpad:3},
     {x:2, y:2.1, text: `Only ${labelB}: ${c}`, font:{size:15, color:'#27ae60'}, showarrow:false, bgcolor:'#abebc6', borderpad:3},
@@ -239,7 +266,7 @@ function drawVennFull(a, b, c, d, labelA, labelB, plotDivId, titleTag) {
 
   Plotly.newPlot(plotDivId, [],
     {
-      title: titleTag+` ${labelA} & ${labelB} (Total: ${total})`,
+      title: `${titleTag} ${labelA} & ${labelB} (Total excluding overlap: ${total})`,
       xaxis:{range:[0,2.4], showgrid:false, zeroline:false, showticklabels:false},
       yaxis:{range:[0,2.5], showgrid:false, zeroline:false, showticklabels:false},
       shapes:[shapeA, shapeB],
@@ -254,12 +281,12 @@ function newTableExample() {
   tablePreset = tableExamples[tableIdx];
   const ex = tablePreset;
   document.getElementById('table-question').innerHTML = `<b>${ex.question}</b>`;
-  document.getElementById('table-desc').innerHTML = "<b>"+ex.desc+"</b>";
+  showVarLabels(ex.rowHeads.join(' / '), ex.colHeads.join(' / '));
+  showSubtitles(ex.rowSubtitles, ex.colSubtitles);
   document.getElementById('rowHead1').textContent = ex.rowHeads[0];
   document.getElementById('rowHead2').textContent = ex.rowHeads[1];
   document.getElementById('colHead1').textContent = ex.colHeads[0];
   document.getElementById('colHead2').textContent = ex.colHeads[1];
-  showVarLabels(ex.rowHeads.join('/'), ex.colHeads.join('/'));
   ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach((id) => {
     document.getElementById(id).value = "";
   });
@@ -273,7 +300,6 @@ function newTableExample() {
 }
 
 document.getElementById('new-table').onclick = newTableExample;
-
 document.getElementById('reset-table').onclick = function(){
   ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach(id => {
     document.getElementById(id).value = "";
@@ -324,7 +350,10 @@ let vennQIdx = 0;
 
 function drawVennQ(values, sets) {
   const {Aonly, Bonly, Both, Neither} = values;
-  const total = Aonly + Bonly + Both + Neither;
+  // Total = Only A + Only B + Neither (excluding overlap)
+  const total = Aonly + Bonly + Neither;
+  // For completeness, also show total with overlap if needed
+  const totalWithOverlap = Aonly + Bonly + Both + Neither;
   let textAnnotations = [
     {x:1, y:2.1, text: `${sets.A} only: ${Aonly}`, font:{size:14, color:'#2980b9'}, showarrow:false, bgcolor:'#85c1e9', borderpad:3},
     {x:2, y:2.1, text: `${sets.B} only: ${Bonly}`, font:{size:14, color:'#27ae60'}, showarrow:false, bgcolor:'#abebc6', borderpad:3},
@@ -336,16 +365,17 @@ function drawVennQ(values, sets) {
 
   Plotly.newPlot('venn-q-plot', [],
     {
-      title:`Venn Diagram: ${sets.A} & ${sets.B} (Total: ${total})`,
+      title:`Venn Diagram: ${sets.A} & ${sets.B} (Total excluding overlap: ${total})`,
       xaxis:{range:[0,2.4], showgrid:false, zeroline:false, showticklabels:false},
       yaxis:{range:[0,2.5], showgrid:false, zeroline:false, showticklabels:false},
       shapes:[shapeA, shapeB],
-      margin:{t:70,l:0,r:0,b:0},
+      margin:{t:75,l:0,r:0,b:0},
       annotations:textAnnotations
     }, {displayModeBar:false}
   );
   document.getElementById('venn-summary-top').innerHTML =
-    `<b>Total:</b> ${total} | <b>${sets.A} only:</b> ${Aonly} | <b>${sets.B} only:</b> ${Bonly} | <b>Both:</b> ${Both} | <b>Neither:</b> ${Neither} | <b>${sets.A} total:</b> ${Aonly+Both} | <b>${sets.B} total:</b> ${Bonly+Both}`;
+    `<b>Total (excluding overlap):</b> ${total} | <b>${sets.A} only:</b> ${Aonly} | <b>${sets.B} only:</b> ${Bonly} | <b>Both:</b> ${Both} | <b>Neither:</b> ${Neither} | <b>${sets.A} total:</b> ${Aonly+Both} | <b>${sets.B} total:</b> ${Bonly+Both}<br>
+     <span style='font-size:0.93em;color:#56606a;'>Total including overlap: ${totalWithOverlap}</span>`;
 }
 
 function newVennQ(){
