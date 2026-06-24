@@ -20,13 +20,13 @@ button:hover { background: #21618c; }
 .table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; }
 .table2 th { background: #d4e6f1; }
 .table2 input[readonly] { background: #e1e8f0; }
-.venn-wrap, .venn-table-wrap { width: 420px; height: 320px; margin: 0 auto;}
-.venn-table-legend { width: 420px; margin:0 auto; margin-bottom: 12px;}
-.venn-table-legend span { display:inline-block; margin-right:12px; padding:2px 10px; border-radius:5px;}
-.venn-table-legend .onlyA { background:#85c1e9; }
-.venn-table-legend .onlyB { background:#abebc6;}
-.venn-table-legend .both { background:#f7ca18; }
-.venn-table-legend .neither { background:#d5dbdb; }
+.venn-wrap, .venn-table-wrap { width: 420px; height: 320px; margin: 0 auto 20px;}
+.venn-table-legend, .venn-legend { width: 420px; margin:0 auto; margin-bottom: 12px;}
+.venn-table-legend span, .venn-legend span { display:inline-block; margin-right:12px; padding:2px 10px; border-radius:5px;}
+.venn-table-legend .onlyA, .venn-legend .onlyA { background:#85c1e9; }
+.venn-table-legend .onlyB, .venn-legend .onlyB { background:#abebc6;}
+.venn-table-legend .both, .venn-legend .both { background:#f7ca18; }
+.venn-table-legend .neither, .venn-legend .neither { background:#d5dbdb; }
 .hint-box {
   background: #d9edf7;
   border-left: 5px solid #31708f;
@@ -40,7 +40,7 @@ button:hover { background: #21618c; }
 .summary-top { font-size:1.1em; margin:12px 0; color:#2980b9; }
 @media (max-width: 600px){
   .venn-wrap, .venn-table-wrap { width: 99vw; height: 220px;}
-  .venn-table-legend { width:99vw;}
+  .venn-table-legend, .venn-legend { width:99vw;}
   .table2 { width: 96vw;}
   .flex { flex-direction: column; }
 }
@@ -121,14 +121,15 @@ button:hover { background: #21618c; }
       <span class="neither">Neither</span>
     </div>
     <div id="table-desc-venn"></div>
-    <div class="venn-table-wrap" id="venn-table-plot" role="img" aria-label="Full Venn diagram from table"></div>
+    <div class="venn-table-wrap" id="venn-table-plot-q" role="img" aria-label="Venn diagram for question"></div>
+    <div class="venn-table-wrap" id="venn-table-plot-user" role="img" aria-label="Venn diagram for user"></div>
   </div>
 </div>
 
 <div class="section" id="venn-section">
   <h2>3. Venn Diagram Interactive</h2>
   <div>
-    <div id="venn-desc"></div>
+    <div class="summary-top" id="venn-summary-top"></div>
     <button id="show-hint-venn" type="button">Show Steps</button>
     <div id="hint-venn" class="hint-box">
       <strong>Steps:</strong><br>
@@ -140,6 +141,12 @@ button:hover { background: #21618c; }
     </div>
     <button id="new-venn">New Venn</button>
     <button id="reset-venn">Reset</button>
+    <div class="venn-legend">
+      <span class="onlyA">A only</span>
+      <span class="onlyB">B only</span>
+      <span class="both">Overlap</span>
+      <span class="neither">Neither</span>
+    </div>
     <div class="venn-wrap" id="venn-plot" role="img" aria-label="Venn diagram"></div>
     <form id="venn-form">
       <label class="label" for="venn-overlap">How many are in both sets (overlap)?</label>
@@ -223,12 +230,15 @@ const tableExamples = [
 let tableIdx = 0;
 let tablePreset = null;
 
+// Utility: always returns integer ≥ 0
 function parseCellValue(id) {
   const raw = document.getElementById(id).value;
   if(raw === null || raw.trim() === "") return 0;
   if(!/^\d+$/.test(raw.trim())) return 0;
   return parseInt(raw.trim(),10);
 }
+
+// Update totals based on table input (live)
 function updateTotals() {
   // Get data from student's input
   const a = parseCellValue('cell11'), b = parseCellValue('cell12'),
@@ -245,67 +255,30 @@ function updateTotals() {
   document.getElementById(id).addEventListener('input', updateTotals);
 });
 
+// Show summary text for Venn regions
 function showTableSummary(a, b, c, d, labelA, labelB) {
   // Only A: b, Only B: c, Both: a, Neither: d
-  const setA = a + b;
-  const setB = a + c;
-  const total = a + b + c + d;
+  const setAonly = b, setBonly = c, overlap = a, neither = d;
+  const setA = setAonly + overlap;
+  const setB = setBonly + overlap;
+  const total = setAonly + setBonly + overlap + neither;
   let s = `<b>Total: ${total} people</b><br>
-    <b>${labelA} only:</b> ${b}<br>
-    <b>${labelB} only:</b> ${c}<br>
-    <b>Both:</b> ${a}<br>
-    <b>Neither:</b> ${d}<br>
-    <b>${labelA} (only or both):</b> ${setA}<br>
-    <b>${labelB} (only or both):</b> ${setB}`;
+    <b>${labelA} only:</b> ${setAonly}<br>
+    <b>${labelB} only:</b> ${setBonly}<br>
+    <b>Both:</b> ${overlap}<br>
+    <b>Neither:</b> ${neither}<br>
+    <b>${labelA} (A only or both):</b> ${setA}<br>
+    <b>${labelB} (B only or both):</b> ${setB}`;
   document.getElementById('table-summary-top').innerHTML = s;
   document.getElementById('onlyAName').textContent = labelA;
   document.getElementById('onlyBName').textContent = labelB;
 }
 
-function newTableExample() {
-  tableIdx = Math.floor(Math.random()*tableExamples.length);
-  tablePreset = tableExamples[tableIdx];
-  const ex = tablePreset;
-  document.getElementById('table-question').innerHTML = `<b>${ex.question}</b>`;
-  document.getElementById('table-desc').innerHTML = "<b>"+ex.desc+"</b>";
-  document.getElementById('rowHead1').textContent = ex.rowHeads[0];
-  document.getElementById('rowHead2').textContent = ex.rowHeads[1];
-  document.getElementById('colHead1').textContent = ex.colHeads[0];
-  document.getElementById('colHead2').textContent = ex.colHeads[1];
-  ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach((id) => {
-    document.getElementById(id).value = "";
-  });
-  updateTotals();
-  // Show summary based on preset matrix
-  let a = ex.matrix[0][0], b = ex.matrix[0][1], c = ex.matrix[1][0], d = ex.matrix[1][1];
-  showTableSummary(a,b,c,d, ex.rowHeads[0], ex.colHeads[0]);
-  document.getElementById('table-feedback').textContent = "";
-  document.getElementById('table-desc-venn').textContent = "";
-  Plotly.purge('venn-table-plot');
-}
-
-document.getElementById('new-table').onclick = newTableExample;
-
-document.getElementById('reset-table').onclick = function(){
-  ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach(id => {
-    document.getElementById(id).value = "";
-  });
-  updateTotals();
-  // Show summary based on preset matrix
-  let a = tablePreset.matrix[0][0], b = tablePreset.matrix[0][1],
-      c = tablePreset.matrix[1][0], d = tablePreset.matrix[1][1];
-  showTableSummary(a,b,c,d, tablePreset.rowHeads[0], tablePreset.colHeads[0]);
-  document.getElementById('table-feedback').textContent = "";
-  document.getElementById('hint-table').style.display = "none";
-  document.getElementById('table-desc-venn').textContent = "";
-  Plotly.purge('venn-table-plot');
-};
-
-function drawVennFull(a, b, c, d, labelA, labelB){
+// Draw Venn diagram for given data (show all regions and summary)
+function drawVennFull(a, b, c, d, labelA, labelB, plotDivId, titleTag) {
   // Only A: b, Only B: c, Both: a, Neither: d
-  const setA = a + b, setB = a + c;
+  const setA = b + a, setB = c + a;
   const total = a + b + c + d;
-
   let textAnnotations = [
     {
       x:1, y:2.1, text: `Only ${labelA}: ${b}`, font:{size:15, color:'#2980b9'},
@@ -334,29 +307,62 @@ function drawVennFull(a, b, c, d, labelA, labelB){
     fillcolor:'rgba(46,204,113,0.09)'
   };
 
-  Plotly.newPlot('venn-table-plot', [],
+  Plotly.newPlot(plotDivId, [],
     {
-      title:`Venn Diagram for ${labelA} & ${labelB} (Total: ${total})`,
+      title: titleTag+` ${labelA} & ${labelB} (Total: ${total})`,
       xaxis:{range:[0,2.4], showgrid:false, zeroline:false, showticklabels:false},
       yaxis:{range:[0,2.5], showgrid:false, zeroline:false, showticklabels:false},
       shapes:[shapeA, shapeB],
-      margin:{t:60,l:0,r:0,b:0},
+      margin:{t:75,l:0,r:0,b:0},
       annotations:textAnnotations
     }, {displayModeBar:false}
   );
-
-  document.getElementById('table-desc-venn').innerHTML =
-    `<b>Total: ${total}<br>
-    Only ${labelA}: ${b}<br>
-    Only ${labelB}: ${c}<br>
-    Both: ${a}<br>
-    Neither: ${d}<br>
-    ${labelA} (only or both): ${setA}<br>
-    ${labelB} (only or both): ${setB}</b>`;
 }
 
+// When new table loaded: show summary and Venn for question matrix
+function newTableExample() {
+  tableIdx = Math.floor(Math.random()*tableExamples.length);
+  tablePreset = tableExamples[tableIdx];
+  const ex = tablePreset;
+  document.getElementById('table-question').innerHTML = `<b>${ex.question}</b>`;
+  document.getElementById('table-desc').innerHTML = "<b>"+ex.desc+"</b>";
+  document.getElementById('rowHead1').textContent = ex.rowHeads[0];
+  document.getElementById('rowHead2').textContent = ex.rowHeads[1];
+  document.getElementById('colHead1').textContent = ex.colHeads[0];
+  document.getElementById('colHead2').textContent = ex.colHeads[1];
+  ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach((id) => {
+    document.getElementById(id).value = "";
+  });
+  updateTotals();
+  let a = ex.matrix[0][0], b = ex.matrix[0][1], c = ex.matrix[1][0], d = ex.matrix[1][1];
+  showTableSummary(a,b,c,d, ex.rowHeads[0], ex.colHeads[0]);
+  drawVennFull(a,b,c,d, ex.rowHeads[0], ex.colHeads[0], 'venn-table-plot-q', 'Question:');
+  // Clear user's Venn
+  Plotly.purge('venn-table-plot-user');
+  document.getElementById('table-desc-venn').textContent = '';
+  document.getElementById('table-feedback').textContent = '';
+}
+
+document.getElementById('new-table').onclick = newTableExample;
+
+// Reset table and summary to question matrix
+document.getElementById('reset-table').onclick = function(){
+  ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  updateTotals();
+  let a = tablePreset.matrix[0][0], b = tablePreset.matrix[0][1],
+      c = tablePreset.matrix[1][0], d = tablePreset.matrix[1][1];
+  showTableSummary(a,b,c,d, tablePreset.rowHeads[0], tablePreset.colHeads[0]);
+  drawVennFull(a,b,c,d, tablePreset.rowHeads[0], tablePreset.colHeads[0], 'venn-table-plot-q', 'Question:');
+  Plotly.purge('venn-table-plot-user');
+  document.getElementById('table-desc-venn').textContent = '';
+  document.getElementById('table-feedback').textContent = "";
+  document.getElementById('hint-table').style.display = "none";
+};
+
+// On submit: show user's summary and venn diagram
 document.getElementById('table-check').onclick = function(){
-  // Use student input if present, else preset
   let a = parseCellValue('cell11'), b = parseCellValue('cell12'),
       c = parseCellValue('cell21'), d = parseCellValue('cell22');
   if(['cell11','cell12','cell21','cell22'].every(id => document.getElementById(id).value === "")){
@@ -368,49 +374,79 @@ document.getElementById('table-check').onclick = function(){
 
   updateTotals();
   showTableSummary(a,b,c,d,labelA,labelB);
-  drawVennFull(a,b,c,d,labelA,labelB);
+  drawVennFull(a,b,c,d,labelA,labelB, 'venn-table-plot-user', 'Your table:');
 };
 
-// --- VENN DIAGRAM ACTIVITY 3--- (unchanged)
+// --- VENN DIAGRAM ACTIVITY 3--- (unchanged except for improved summary) ---
 function randomVennData(){
   let total = Math.floor(Math.random()*18)+12;
   let A = Math.floor(Math.random()*total/2)+4;
   let B = Math.floor(Math.random()*total/2)+4;
   let overlap = Math.floor(Math.min(A,B)/2)+1;
-  return {total, A, B, overlap};
+  let neither = total - (A + B - overlap); // Only A = A-overlap, Only B = B-overlap
+  return {total, A, B, overlap, neither};
 }
 let vennData = randomVennData();
 
+function vennSummaryText(A, B, overlap, neither){
+  let onlyA = A - overlap, onlyB = B - overlap;
+  let s = `<b>Total:</b> ${A+onlyB+overlap+neither}  
+           <b>A only:</b> ${onlyA}  
+           <b>B only:</b> ${onlyB}  
+           <b>Both (overlap):</b> ${overlap}  
+           <b>A total:</b> ${A}  
+           <b>B total:</b> ${B}  
+           <b>Neither:</b> ${neither}`;
+  return s;
+}
+
 function drawVenn(){
-  const {A,B,overlap,total} = vennData;
-  let traceA = {
-    x:[1], y:[1.5], text:`A<br>${A}`, mode:'text', textfont:{size:20}, showlegend:false
+  const {A,B,overlap,total,neither} = vennData;
+  let onlyA = A - overlap, onlyB = B - overlap;
+  let textAnnotations = [
+    {
+      x:1, y:2.1, text: `A only: ${onlyA}`, font:{size:15, color:'#2980b9'},
+      showarrow:false, bgcolor:'#85c1e9', borderpad:3
+    },
+    {
+      x:2, y:2.1, text: `B only: ${onlyB}`, font:{size:15, color:'#27ae60'},
+      showarrow:false, bgcolor:'#abebc6', borderpad:3
+    },
+    {
+      x:1.48, y:1.5, text: `Overlap: ${overlap}`, font:{size:15, color:'#b7950b'},
+      showarrow:false, bgcolor:'#f7ca18', borderpad:4
+    },
+    {
+      x:0.45, y:0.65, text: `Neither: ${neither}`, font:{size:14, color:'#616161'},
+      showarrow:false, bgcolor:'#d5dbdb', borderpad:4
+    }
+  ];
+  let shapeA = {
+    type:'circle', xref:'x', yref:'y', x0:0.8, y0:1, x1:1.7, y1:2,
+    line:{color:'#5dade2', width:3}, fillcolor:'rgba(33,150,243,0.12)'
   };
-  let traceB = {
-    x:[2], y:[1.5], text:`B<br>${B}`, mode:'text', textfont:{size:20}, showlegend:false
+  let shapeB = {
+    type:'circle', xref:'x', yref:'y', x0:1.25, y0:1, x1:2.15, y1:2,
+    line:{color:'#52be80', width:3}, fillcolor:'rgba(46,204,113,0.09)'
   };
-  let traceOverlap = {
-    x:[1.5], y:[1.5], text:`Overlap<br>${overlap}`,mode:'text', textfont:{size:18}, showlegend:false
-  };
-  let shapeA = {type:'circle', xref:'x', yref:'y', x0:0.7, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3}, fillcolor:'rgba(33,150,243,0.1)'};
-  let shapeB = {type:'circle', xref:'x', yref:'y', x0:1.3, y0:1, x1:2.3, y1:2, line:{color:'#52be80', width:3}, fillcolor:'rgba(46,204,113,0.1)'};
-  Plotly.newPlot('venn-plot', [traceA, traceB, traceOverlap], {
-    title:"Venn Diagram",
-    xaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
-    yaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
-    shapes:[shapeA, shapeB],
-    margin:{t:60,l:0,r:0,b:0}
-  });
+  Plotly.newPlot('venn-plot', [],
+    {
+      title:`Venn Diagram (A & B)`,
+      xaxis:{range:[0,2.4], showgrid:false, zeroline:false, showticklabels:false},
+      yaxis:{range:[0,2.5], showgrid:false, zeroline:false, showticklabels:false},
+      shapes:[shapeA, shapeB],
+      margin:{t:70,l:0,r:0,b:0},
+      annotations:textAnnotations
+    }, {displayModeBar:false}
+  );
+  // Update top left summary text
+  document.getElementById('venn-summary-top').innerHTML =
+    vennSummaryText(A,B,overlap,neither);
 }
 
 function newVenn(){
   vennData = randomVennData();
   drawVenn();
-  document.getElementById('venn-desc').innerHTML =
-    `<b>There are ${vennData.total} people in total.<br>
-    Set A has ${vennData.A} people.<br>
-    Set B has ${vennData.B} people.<br>
-    Some are in both sets.</b>`;
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
   document.getElementById('hint-venn').style.display = "none";
@@ -421,6 +457,7 @@ document.getElementById('reset-venn').onclick = function(){
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
   document.getElementById('hint-venn').style.display = "none";
+  drawVenn();
 };
 
 document.getElementById('venn-form').onsubmit = function(e){
