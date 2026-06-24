@@ -200,17 +200,13 @@ const tableExamples = [
   }
 ];
 let tableIdx = 0;
-function parseCellValue(id) {
-  const raw = document.getElementById(id).value;
-  if(raw === null || raw.trim() === "") return 0;
-  if(!/^\d+$/.test(raw.trim())) return 0;
-  return parseInt(raw.trim(),10);
-}
+let tablePreset = null;
+
 function updateTotals() {
-  const c11 = parseCellValue('cell11');
-  const c12 = parseCellValue('cell12');
-  const c21 = parseCellValue('cell21');
-  const c22 = parseCellValue('cell22');
+  const c11 = tablePreset.matrix[0][0];
+  const c12 = tablePreset.matrix[0][1];
+  const c21 = tablePreset.matrix[1][0];
+  const c22 = tablePreset.matrix[1][1];
 
   const row1Total = c11 + c12;
   const row2Total = c21 + c22;
@@ -227,13 +223,15 @@ function updateTotals() {
 
 function newTableExample() {
   tableIdx = Math.floor(Math.random()*tableExamples.length);
-  const ex = tableExamples[tableIdx];
+  tablePreset = tableExamples[tableIdx];
+  const ex = tablePreset;
   document.getElementById('table-desc').innerHTML = "<b>"+ex.desc+"</b>";
   document.getElementById('rowHead1').textContent = ex.rowHeads[0];
   document.getElementById('rowHead2').textContent = ex.rowHeads[1];
   document.getElementById('colHead1').textContent = ex.colHeads[0];
   document.getElementById('colHead2').textContent = ex.colHeads[1];
-  ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach(id => {
+  // Fill table with blanks
+  ['cell11','cell12','cell21','cell22'].forEach((id,i) => {
     document.getElementById(id).value = "";
   });
   updateTotals();
@@ -241,10 +239,6 @@ function newTableExample() {
   document.getElementById('table-desc-venn').textContent = "";
   Plotly.purge('venn-table-plot');
 }
-
-['cell11','cell12','cell21','cell22'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updateTotals);
-});
 
 document.getElementById('new-table').onclick = newTableExample;
 
@@ -288,16 +282,21 @@ function drawVennFromTable(A, B, overlap, total, labelA, labelB) {
     Overlap: ${overlap}</b>`;
 }
 
+// On submit (or page load), show Venn for preset data
 document.getElementById('table-check').onclick = function(){
   updateTotals();
   document.getElementById('table-feedback').textContent = "";
 
-  const A = Number(document.getElementById('rowTotal1').value);
-  const B = Number(document.getElementById('colTotal1').value);
-  const overlap = parseCellValue('cell11');
-  const total = Number(document.getElementById('grandTotal').value);
-  const labelA = document.getElementById('rowHead1').textContent;
-  const labelB = document.getElementById('colHead1').textContent;
+  const c11  = tablePreset.matrix[0][0];
+  const c12  = tablePreset.matrix[0][1];
+  const c21  = tablePreset.matrix[1][0];
+  const c22  = tablePreset.matrix[1][1];
+  const A    = c11 + c12;
+  const B    = c11 + c21;
+  const overlap = c11;
+  const total  = A + c21 + c12 + c22;
+  const labelA = tablePreset.rowHeads[0];
+  const labelB = tablePreset.colHeads[0];
 
   drawVennFromTable(A, B, overlap, total, labelA, labelB);
 };
