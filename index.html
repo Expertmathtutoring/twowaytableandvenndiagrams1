@@ -1,553 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Fun Probability Activities - Mutually Exclusive, Two-Way Table, Venn Diagram</title>
-<style>
-  body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; background: #eef6fa; color: #153e7e; }
-  h1, h2 { color: #1a5276; text-align: center; }
-  .section {
-    background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #b1c7db4d; margin-bottom: 40px; padding: 20px;
-  }
-  button {
-    background: #1a5276; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; font-size: 1rem; cursor: pointer; margin-top: 12px;
-  }
-  button:hover { background: #154360; }
-  .label { font-weight: bold; margin-right: 8px; }
-  .feedback {
-    margin-top: 12px; font-weight: bold;
-  }
-  .feedback.correct { color: green; }
-  .feedback.incorrect { color: red; }
-  .hint-box {
-    background: #d9edf7;
-    border-left: 5px solid #31708f;
-    padding: 10px 15px;
-    margin-top: 10px;
-    font-size: 0.95rem;
-    display: none;
-    border-radius: 4px;
-    color: #31708f;
-  }
-  #mystery-list {
-    list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; justify-content: center;
-  }
-  #mystery-list li {
-    background: #5499c7; color: white; padding: 8px 12px; border-radius: 5px; cursor: grab; user-select: none; font-weight: bold;
-  }
-  #mystery-list li.dragging { opacity: 0.5; }
-  table { border-collapse: collapse; margin: 0 auto 20px auto; }
-  th, td { border: 2px solid #154360; padding: 18px 25px; min-width: 90px; text-align: center; vertical-align: middle; background: #d6eaf8; font-weight: bold; font-size: 1.05rem; }
-  th { background: #1a5276; color: white; }
-  td.dropzone { background: #ebf5fb; font-weight: normal; cursor: pointer; min-height: 50px; }
-  td.dropzone:hover { background-color: #aed6f1; }
-  td.dropzone.filled { background-color: #85c1e9; color: white; cursor: default; }
-  #venn-from-sort { width:420px; height:320px; margin: 0 auto; }
-  #venn-container { display: flex; justify-content: center; margin-bottom: 10px; }
-  #venn-diagram { position: relative; width: 400px; height: 260px; }
-  .circle { position: absolute; width: 200px; height: 200px; border-radius: 50%; border: 4px solid; }
-  #circleA { top: 20px; left: 70px; border-color: #2980b9; background: rgba(41,128,185,0.15); z-index: 2; }
-  #circleB { top: 20px; left: 160px; border-color: #27ae60; background: rgba(39,174,96,0.15); z-index: 2; }
-  .venn-region {
-    position: absolute;
-    background: #f7f9fa;
-    border-radius: 12px;
-    border: 2px solid #777;
-    padding: 6px 10px;
-    font-weight: bold;
-    cursor: grab;
-    user-select: none;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    transition: background-color 0.3s;
-  }
-  .venn-region.dragging { opacity: 0.5; cursor: grabbing; }
-  #reg-Aonly { top: 65px; left: 110px; width: 65px; text-align: center; }
-  #reg-Bonly { top: 65px; left: 230px; width: 65px; text-align: center; }
-  #reg-Both { top: 110px; left: 165px; width: 60px; text-align: center; }
-  #reg-Neither { top: 190px; left: 170px; width: 80px; text-align: center; }
-  #dropzones { margin-top: 20px; display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
-  .dropzone-box {
-    border: 2px dashed #2980b9; border-radius: 8px; width: 140px; height: 70px; padding: 10px; text-align: center;
-    color: #2980b9; font-weight: bold; font-size: 1.1rem;
-  }
-  .dropzone-box.highlight { border-color: #27ae60; background-color: #d4efdf; }
-  #venn-feedback { margin-top: 16px; font-weight: bold; }
-  #venn-feedback.correct { color: green; }
-  #venn-feedback.incorrect { color: red; }
-  li[draggable="true"]:focus, .dropzone-box:focus { outline: 2px solid #27ae60; outline-offset: 4px; }
-  @media(max-width:700px) {
-    #venn-container { justify-content: center; flex-direction: column; align-items: center; }
-    #venn-diagram { width: 90vw; height: 220px; }
-  }
-</style>
+<meta charset="UTF-8">
+<title>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+body { font-family: Arial, sans-serif; max-width: 840px; margin: 20px auto; background: #eef6fa; }
+h1, h2 { color: #2980b9; text-align: center; }
+.section { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #b1c7db4d; margin-bottom: 35px; padding: 20px; }
+.flex { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+.label { font-weight: bold; margin-right: 8px; }
+button { background: #2980b9; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; font-size: 1rem; cursor: pointer; margin-top: 12px; }
+button:hover { background: #21618c; }
+.input-small { width: 54px; }
+.correct { color: green; font-weight: bold; }
+.incorrect { color: red; font-weight: bold; }
+.table-wrap { overflow-x: auto; margin-top: 16px; }
+.table2 { border-collapse: collapse; width: 350px; background: #f9f9fa; }
+.table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+.table2 th { background: #d4e6f1; }
+.venn-wrap { width: 420px; height: 300px; margin: 0 auto;}
+@media (max-width: 600px){
+  .venn-wrap { width: 99vw; height: 220px;}
+  .table2 { width: 96vw;}
+  .flex { flex-direction: column; }
+}
+</style>
 </head>
 <body>
-<h1>Fun Probability Activities</h1>
+<h1>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</h1>
 
-<!-- ACTIVITY 1: Mutually Exclusive Events -->
-<div class="section" id="activity1">
-  <h2>1. Mutually Exclusive Events</h2>
-  <p id="event-desc" style="font-weight:bold;"></p>
-  <form id="exclusive-form" aria-describedby="hint-exclusive">
-    <fieldset>
-      <legend>Are these events mutually exclusive?</legend>
-      <label>
-        <input type="radio" name="exclusive" value="mutual" required> Yes
-      </label>
-      <label>
-        <input type="radio" name="exclusive" value="non-mutual"> No
-      </label>
-    </fieldset>
-    <button type="submit">Submit</button>
-  </form>
-  <button id="show-hint-exclusive" aria-expanded="false" aria-controls="hint-exclusive">Show Hint</button>
-  <div id="hint-exclusive" class="hint-box" aria-live="polite">
-    Mutually exclusive events cannot happen together. If events can happen simultaneously, they are not mutually exclusive.
-  </div>
-  <p id="exclusive-feedback" class="feedback" aria-live="polite"></p>
-  <button id="new-event">New Example</button>
-</div>
-
-<!-- ACTIVITY 2: Two-way Table Mystery Sorting -->
-<div class="section" id="activity2">
-  <h2>2. Two-way Table: Mystery Sorting</h2>
-  <p id="table-instruction" style="font-weight:bold; text-align:center;">Drag the students into the correct boxes.</p>
-  <ul id="mystery-list" aria-label="List of students to sort" tabindex="0">
-    <!-- generated by JS -->
-  </ul>
-
-  <table aria-label="Two-way table">
-    <thead>
-      <tr>
-        <th>A / Fruit</th>
-        <th>Likes Chocolate</th>
-        <th>Does Not Like Chocolate</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th>Apple</th>
-        <td id="Apple-Likes Chocolate" class="dropzone" tabindex="0" aria-dropeffect="none">Drop Here</td>
-        <td id="Apple-Does Not Like Chocolate" class="dropzone" tabindex="0" aria-dropeffect="none">Drop Here</td>
-      </tr>
-      <tr>
-        <th>Banana</th>
-        <td id="Banana-Likes Chocolate" class="dropzone" tabindex="0" aria-dropeffect="none">Drop Here</td>
-        <td id="Banana-Does Not Like Chocolate" class="dropzone" tabindex="0" aria-dropeffect="none">Drop Here</td>
-      </tr>
-    </tbody>
-  </table>
-  <button id="check-sort">Check Sort & Show Summary</button>
-  <p id="sort-feedback" class="feedback" aria-live="polite"></p>
-  <div id="venn-from-sort" style="width:420px; height:320px; margin: 0 auto;"></div>
-</div>
-
-<!-- ACTIVITY 3: Venn Diagram Treasure Hunt -->
-<div class="section" id="activity3">
-  <h2>3. Venn Diagram Treasure Hunt</h2>
-  <p>Drag each treasure to the correct Venn diagram region.</p>
-  <div id="venn-container" aria-label="Interactive Venn Diagram Treasure Hunt">
-    <div id="venn-diagram" aria-hidden="true" role="img">
-      <div id="circleA" class="circle" aria-label="Set A circle"></div>
-      <div id="circleB" class="circle" aria-label="Set B circle"></div>
+<div class="section" id="exclusive-section">
+  <h2>1. Mutually vs Non-Mutually Exclusive Events</h2>
+  <div class="flex">
+    <div>
+      <div id="event-desc"></div>
+      <button id="new-event">New Example</button>
+      <button id="reset-event">Reset</button>
+      <form id="exclusive-form" style="margin-top:12px;">
+        <label class="label">Are these events mutually exclusive?</label>
+        <input type="radio" name="exclusive" value="mutual" id="mutual" required>
+        <label for="mutual">Yes</label>
+        <input type="radio" name="exclusive" value="non-mutual" id="non-mutual">
+        <label for="non-mutual">No</label>
+        <button type="submit">Submit</button>
+      </form>
+      <div id="exclusive-feedback"></div>
     </div>
   </div>
-  <div id="dropzones" aria-label="Venn diagram regions drop zones">
-    <div tabindex="0" class="dropzone-box" id="drop-Aonly" data-region="Aonly" aria-dropeffect="none" aria-label="A only">A only</div>
-    <div tabindex="0" class="dropzone-box" id="drop-Bonly" data-region="Bonly" aria-dropeffect="none" aria-label="B only">B only</div>
-    <div tabindex="0" class="dropzone-box" id="drop-Both" data-region="Both" aria-dropeffect="none" aria-label="Both sets">Both</div>
-    <div tabindex="0" class="dropzone-box" id="drop-Neither" data-region="Neither" aria-dropeffect="none" aria-label="Neither set">Neither</div>
+</div>
+
+<div class="section" id="table-section">
+  <h2>2. Two-way Table Activity</h2>
+  <div>
+    <div id="table-desc"></div>
+    <button id="new-table">New Table</button>
+    <button id="reset-table">Reset</button>
+    <div class="table-wrap">
+      <table class="table2" id="table2">
+        <tr>
+          <th></th>
+          <th id="colHead1"></th>
+          <th id="colHead2"></th>
+        </tr>
+        <tr>
+          <th id="rowHead1"></th>
+          <td><input class="input-small" id="cell11" type="number"></td>
+          <td><input class="input-small" id="cell12" type="number"></td>
+        </tr>
+        <tr>
+          <th id="rowHead2"></th>
+          <td><input class="input-small" id="cell21" type="number"></td>
+          <td><input class="input-small" id="cell22" type="number"></td>
+        </tr>
+      </table>
+    </div>
+    <button id="table-check">Submit Table</button>
+    <div id="table-feedback"></div>
   </div>
-  <p id="venn-feedback" class="feedback" aria-live="polite"></p>
-  <button id="check-venn-hunt">Check Answers</button>
-  <button id="reset-venn-hunt">Reset Treasures</button>
+</div>
+
+<div class="section" id="venn-section">
+  <h2>3. Venn Diagram Interactive</h2>
+  <div>
+    <div id="venn-desc"></div>
+    <button id="new-venn">New Venn</button>
+    <button id="reset-venn">Reset</button>
+    <div class="venn-wrap" id="venn-plot"></div>
+    <form id="venn-form">
+      <label class="label">How many are in both sets (overlap)?</label>
+      <input type="number" id="venn-overlap" required>
+      <button type="submit">Submit Answer</button>
+    </form>
+    <div id="venn-feedback"></div>
+  </div>
 </div>
 
 <script>
-// --- ACTIVITY 1 ---
+// --- EVENTS ---
 const eventExamples = [
-  {desc:"Rolling a die: Event A is getting an even number; Event B is getting an odd number.", mutual:true},
-  {desc:"Drawing a card: Event A is drawing a red card; Event B is drawing a King.", mutual:false},
-  {desc:"Flipping a coin: Event A is getting heads; Event B is getting tails.", mutual:true},
-  {desc:"Picking a student: Event A is a girl; Event B is student who wears glasses.", mutual:false},
-  {desc:"Choosing a day: Event A is a weekend; Event B is a day starting with 'S'.", mutual:false},
-  {desc:"Drawing a marble: Event A is blue; Event B is green.", mutual:true},
-  {desc:"Selecting a pet: Event A is a dog; Event B is a large animal.", mutual:false}
+  {desc:"Rolling a die: Event A is getting an even number, Event B is getting an odd number.", mutual:true},
+  {desc:"Drawing a card: Event A is getting a red card, Event B is getting a King.", mutual:false},
+  {desc:"Flipping a coin: Event A is getting heads, Event B is getting tails.", mutual:true},
+  {desc:"Picking a student: Event A is a girl, Event B is a student who wears glasses.", mutual:false},
+  {desc:"Choosing a day: Event A is a weekend, Event B is a day starting with 'S'.", mutual:false},
+  {desc:"Drawing a marble: Event A is blue, Event B is green.", mutual:true},
+  {desc:"Selecting a pet: Event A is a dog, Event B is a large animal.", mutual:false}
 ];
-let exclusiveCurrent=null;
+
 function newEventExample(){
   const idx = Math.floor(Math.random()*eventExamples.length);
   const example = eventExamples[idx];
-  document.getElementById('event-desc').textContent = example.desc;
-  exclusiveCurrent = example.mutual;
-  document.getElementById('exclusive-feedback').textContent = "";
+  document.getElementById('event-desc').innerHTML = "<b>"+example.desc+"</b>";
   document.getElementById('exclusive-form').reset();
-  document.getElementById('hint-exclusive').style.display = "none";
-  document.getElementById('show-hint-exclusive').setAttribute('aria-expanded', 'false');
+  document.getElementById('exclusive-feedback').textContent = "";
+  exclusiveCurrent = example.mutual;
 }
 document.getElementById('new-event').onclick = newEventExample;
-document.getElementById('show-hint-exclusive').onclick = function(){
-  const hint = document.getElementById('hint-exclusive');
-  let exp = this.getAttribute('aria-expanded') === 'true';
-  hint.style.display = exp ? 'none' : 'block';
-  this.setAttribute('aria-expanded', !exp);
+document.getElementById('reset-event').onclick = function(){
+  document.getElementById('exclusive-form').reset();
+  document.getElementById('exclusive-feedback').textContent = "";
 };
-// Always show feedback, even if radio not selected
-document.getElementById('exclusive-form').addEventListener('submit', function(e){
+let exclusiveCurrent=true;
+document.getElementById('exclusive-form').onsubmit = function(e){
   e.preventDefault();
   const val = document.querySelector('input[name="exclusive"]:checked');
   const feedback = document.getElementById('exclusive-feedback');
-  if(!val){
-    feedback.textContent = "Please select Yes or No.";
-    feedback.className = "feedback incorrect";
-    return;
+  if(val){
+    if((val.value === "mutual" && exclusiveCurrent) ||
+       (val.value === "non-mutual" && !exclusiveCurrent)){
+      feedback.innerHTML = "<span class='correct'>🎉 Correct!</span>";
+    } else {
+      feedback.innerHTML = "<span class='incorrect'>❌ Not correct. Try again!</span>";
+    }
   }
-  if ((val.value === "mutual" && exclusiveCurrent) || (val.value === "non-mutual" && !exclusiveCurrent)) {
-    feedback.textContent = "🎉 Correct!";
-    feedback.className = "feedback correct";
-  } else {
-    feedback.textContent = "❌ Not correct. Try again!";
-    feedback.className = "feedback incorrect";
-  }
-});
+}
 newEventExample();
 
-// --- ACTIVITY 2 ---
-const students = [
-  {name:"Jane", row:"Apple", col:"Likes Chocolate"},
-  {name:"Mike", row:"Banana", col:"Does Not Like Chocolate"},
-  {name:"Alice", row:"Banana", col:"Likes Chocolate"},
-  {name:"Tom", row:"Apple", col:"Does Not Like Chocolate"},
-  {name:"Lara", row:"Apple", col:"Likes Chocolate"},
-  {name:"Ryan", row:"Banana", col:"Likes Chocolate"},
-  {name:"Nina", row:"Banana", col:"Does Not Like Chocolate"},
-  {name:"James", row:"Apple", col:"Does Not Like Chocolate"},
+// --- TABLE ACTIVITY ---
+const tableExamples = [
+  {
+    desc:"Fill in the table for 'Favorite Fruit vs Likes Chocolate'.",
+    rowHeads:["Apple","Banana"], colHeads:["Likes Chocolate","Doesn't Like Chocolate"],
+    matrix:[[8,3],[5,4]]
+  },
+  {
+    desc:"Fill in the table for 'Season vs Likes Swimming'.",
+    rowHeads:["Summer","Winter"],colHeads:["Likes Swimming","Doesn't Like Swimming"],
+    matrix:[[10,2],[3,8]]
+  },
+  {
+    desc:"Fill in the table for 'Gender vs Likes Pizza'.",
+    rowHeads:["Boy","Girl"],colHeads:["Likes Pizza","Doesn't Like Pizza"],
+    matrix:[[9,4],[7,5]]
+  }
 ];
-const rowCategories = ["Apple","Banana"];
-const colCategories = ["Likes Chocolate", "Does Not Like Chocolate"];
-const mysteryListUL = document.getElementById('mystery-list');
-const dropzones = {};
-rowCategories.forEach(r => {
-  colCategories.forEach(c => {
-    dropzones[`${r}-${c}`] = document.getElementById(`${r}-${c}`);
-  });
-});
-function createDraggableStudentElement(student){
-  const li = document.createElement('li');
-  li.textContent = student.name;
-  li.draggable = true;
-  li.setAttribute('aria-grabbed', 'false');
-  li.tabIndex = 0;
-  li.dataset.row = student.row;
-  li.dataset.col = student.col;
-  li.id = "stu-"+student.name;
-  li.addEventListener('dragstart', dragStart);
-  li.addEventListener('dragend', dragEnd);
-  li.addEventListener('keydown', keyboardDragStart);
-  return li;
+
+let tableIdx = 0;
+function newTableExample() {
+  tableIdx = Math.floor(Math.random()*tableExamples.length);
+  const ex = tableExamples[tableIdx];
+  document.getElementById('table-desc').innerHTML = "<b>"+ex.desc+"</b>";
+  document.getElementById('rowHead1').textContent = ex.rowHeads[0];
+  document.getElementById('rowHead2').textContent = ex.rowHeads[1];
+  document.getElementById('colHead1').textContent = ex.colHeads[0];
+  document.getElementById('colHead2').textContent = ex.colHeads[1];
+  ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById('table-feedback').textContent = "";
 }
-function rebuildMysteryList(){
-  mysteryListUL.innerHTML = "";
-  students.forEach(stu => {
-    const li = createDraggableStudentElement(stu);
-    mysteryListUL.appendChild(li);
-  });
-  // Reset cells visually
-  Object.values(dropzones).forEach(dz => {
-    dz.classList.remove('filled');
-    dz.innerHTML = "Drop Here";
-  });
-}
-let draggedElement = null;
-function dragStart(e){
-  draggedElement = e.target;
-  e.dataTransfer.setData('text/plain', draggedElement.id);
-  e.dataTransfer.effectAllowed = "move";
-  draggedElement.classList.add('dragging');
-  draggedElement.setAttribute('aria-grabbed', 'true');
-}
-function dragEnd(e){
-  if(draggedElement){
-    draggedElement.classList.remove('dragging');
-    draggedElement.setAttribute('aria-grabbed', 'false');
-  }
-  draggedElement = null;
-}
-// keyboard drag start
-let keyboardDragElement = null;
-function keyboardDragStart(e){
-  if(e.key === ' ' || e.key === 'Enter'){
-    e.preventDefault();
-    if(keyboardDragElement === e.target){
-      const dropzone = document.activeElement.closest('.dropzone');
-      if(dropzone && keyboardDragElement){
-        dropzone.appendChild(keyboardDragElement);
-        dropzone.classList.add('filled');
-        dropzone.setAttribute('aria-dropeffect', 'none');
-        keyboardDragElement = null;
-      }
-    }
-    else{
-      if(keyboardDragElement){
-        keyboardDragElement.classList.remove('dragging');
-        keyboardDragElement.setAttribute('aria-grabbed', 'false');
-      }
-      keyboardDragElement = e.target;
-      keyboardDragElement.classList.add('dragging');
-      keyboardDragElement.setAttribute('aria-grabbed', 'true');
-    }
-  }
-  if(e.key === 'Escape' && keyboardDragElement){
-    keyboardDragElement.classList.remove('dragging');
-    keyboardDragElement.setAttribute('aria-grabbed', 'false');
-    keyboardDragElement = null;
-  }
-}
-Object.values(dropzones).forEach(dz => {
-  dz.addEventListener('dragover', e => {
-    e.preventDefault();
-    dz.classList.add('highlight');
-  });
-  dz.addEventListener('dragleave', e => {
-    dz.classList.remove('highlight');
-  });
-  dz.addEventListener('drop', e => {
-    e.preventDefault();
-    dz.classList.remove('highlight');
-    const id = e.dataTransfer.getData('text/plain');
-    const draggedNode = document.getElementById(id);
-    if (draggedNode){
-      dz.appendChild(draggedNode);
-      dz.classList.add('filled');
-      dz.setAttribute('aria-dropeffect', 'none');
-      dz.innerHTML = ""; // empty to make room for li
-    }
-  });
-});
-document.getElementById("check-sort").onclick = function(){
-  const counts = {};
-  rowCategories.forEach(r => {
-    colCategories.forEach(c => {
-      counts[`${r}-${c}`] = Array.from(dropzones[`${r}-${c}`].children)
-        .filter(el => el.tagName === "LI").length;
-    });
-  });
-  let unplacedCount = Array.from(mysteryListUL.children)
-    .filter(el => el.tagName === "LI").length;
-  const feedback = document.getElementById('sort-feedback');
-  if(unplacedCount > 0){
-    feedback.textContent = "Please place all students into the correct boxes before checking.";
-    feedback.className = "feedback incorrect";
-    drawVennFromSort({onlyA:0,onlyB:0,overlap:0,neither:0});
-    return;
-  }
-  const expected = {
-    "Apple-Likes Chocolate": 2,
-    "Apple-Does Not Like Chocolate": 2,
-    "Banana-Likes Chocolate": 2,
-    "Banana-Does Not Like Chocolate": 2
-  };
+document.getElementById('new-table').onclick=newTableExample;
+document.getElementById('reset-table').onclick=function(){
+  ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById('table-feedback').textContent = "";
+};
+document.getElementById('table-check').onclick=function(){
+  const ex = tableExamples[tableIdx];
   let correct = true;
-  for(const k in expected){
-    if(counts[k] !== expected[k]){
-      correct = false;
-      break;
-    }
-  }
+  correct &= (parseInt(document.getElementById('cell11').value) === ex.matrix[0][0]);
+  correct &= (parseInt(document.getElementById('cell12').value) === ex.matrix[0][1]);
+  correct &= (parseInt(document.getElementById('cell21').value) === ex.matrix[1][0]);
+  correct &= (parseInt(document.getElementById('cell22').value) === ex.matrix[1][1]);
+  const feedback = document.getElementById('table-feedback');
   if(correct){
-    feedback.textContent = "🎉 All students sorted correctly!";
-    feedback.className = "feedback correct";
-  } else{
-    feedback.textContent = "❌ Some students are not sorted correctly. Try again!";
-    feedback.className = "feedback incorrect";
+    feedback.innerHTML = "<span class='correct'>🎉 Correct!</span>";
+  }else{
+    feedback.innerHTML = "<span class='incorrect'>❌ Some values are not correct. Try again!</span>";
   }
-  const overlap = counts["Apple-Likes Chocolate"] || 0;
-  const onlyA = counts["Apple-Does Not Like Chocolate"] || 0;
-  const onlyB = counts["Banana-Likes Chocolate"] || 0;
-  const neither = counts["Banana-Does Not Like Chocolate"] || 0;
-  drawVennFromSort({onlyA, onlyB, overlap, neither});
 };
-function drawVennFromSort(data){
-  const plotId = 'venn-from-sort';
-  const {onlyA, onlyB, overlap, neither} = data;
-  Plotly.newPlot(plotId, [], {
-    shapes:[
-      {type:'circle', xref:'x', yref:'y', x0:0.85, y0:1, x1:1.7, y1:2, line:{color:'#2980b9', width:3}, fillcolor:'rgba(41,128,185,0.15)'},
-      {type:'circle', xref:'x', yref:'y', x0:1.3, y0:1, x1:2.15, y1:2, line:{color:'#27ae60', width:3}, fillcolor:'rgba(39,174,96,0.15)'}
-    ],
-    annotations:[
-      {x:1.1, y:2.05, text:`Only Apple: ${onlyA}`, font:{size:14, color:'#2980b9'}, showarrow:false, bgcolor:'#85c1e9', borderpad:4},
-      {x:1.95, y:2.05, text:`Only Likes Chocolate: ${onlyB}`, font:{size:14, color:'#27ae60'}, showarrow:false, bgcolor:'#abebc6', borderpad:4},
-      {x:1.5, y:1.5, text:`Both: ${overlap}`, font:{size:14, color:'#b7950b'}, showarrow:false, bgcolor:'#f7ca18', borderpad:5},
-      {x:0.45, y:0.7, text:`Neither: ${neither}`, font:{size:14, color:'#616161'}, showarrow:false, bgcolor:'#d5dbdb', borderpad:4}
-    ],
-    title: "Venn Diagram: Apple & Likes Chocolate",
-    xaxis:{range:[0.3,2.4], showgrid:false, zeroline:false, showticklabels:false},
-    yaxis:{range:[0,2.5], showgrid:false, zeroline:false, showticklabels:false},
-    margin: {t:80,l:0,r:0,b:0}
-  }, {displayModeBar: false});
-}
-rebuildMysteryList();
+newTableExample();
 
-// --- ACTIVITY 3 ---
-const treasuresData = [
-  {name: "Pizza Gem", region: "Aonly", emoji:"🍕"},
-  {name: "Pasta Pearl", region: "Bonly", emoji:"🍝"},
-  {name: "Combo Crown", region: "Both", emoji:"👑"},
-  {name: "No Food Nugget", region: "Neither", emoji:"💎"},
-];
-const vennDiagramDiv = document.getElementById('venn-diagram');
-const dropzonesBoxes = {
-  "Aonly": document.getElementById('drop-Aonly'),
-  "Bonly": document.getElementById('drop-Bonly'),
-  "Both": document.getElementById('drop-Both'),
-  "Neither": document.getElementById('drop-Neither')
-};
-let draggedTreasure = null;
-function createTreasureElements(){
-  Array.from(vennDiagramDiv.querySelectorAll('.venn-region')).forEach(el => el.remove());
-  treasuresData.forEach((treasure, i) => {
-    let div = document.createElement('div');
-    div.className = 'venn-region';
-    div.textContent = treasure.emoji + " " + treasure.name;
-    div.draggable = true;
-    div.id = 'treasure-'+i;
-    div.dataset.region = treasure.region;
-    div.tabIndex = 0;
-    div.setAttribute('aria-grabbed', 'false');
-    div.addEventListener('dragstart', vennDragStart);
-    div.addEventListener('dragend', vennDragEnd);
-    div.addEventListener('keydown', vennKeyboardDragStart);
-    if(treasure.region === 'Both'){
-      div.style.top = '95px';
-      div.style.left = '165px';
-    } else if(treasure.region === 'Aonly'){
-      div.style.top = '65px';
-      div.style.left = '110px';
-    } else if(treasure.region === 'Bonly'){
-      div.style.top = '65px';
-      div.style.left = '230px';
-    } else if(treasure.region === 'Neither'){
-      div.style.top = '190px';
-      div.style.left = '170px';
-    }
-    vennDiagramDiv.appendChild(div);
-  });
+// --- VENN DIAGRAM ---
+function randomVennData(){
+  // Simple random values for sets
+  let total = Math.floor(Math.random()*18)+12; // 12 to 29
+  let A = Math.floor(Math.random()*total/2)+4; // 4 to half of total
+  let B = Math.floor(Math.random()*total/2)+4;
+  let overlap = Math.floor(Math.min(A,B)/2)+1; // at least 1 in the overlap, at most min(A,B)/2
+  return {total, A, B, overlap};
 }
-createTreasureElements();
-function vennDragStart(e){
-  draggedTreasure = e.target;
-  e.dataTransfer.setData("text/plain", draggedTreasure.id);
-  e.dataTransfer.effectAllowed = "move";
-  draggedTreasure.classList.add('dragging');
-  draggedTreasure.setAttribute('aria-grabbed', 'true');
-}
-function vennDragEnd(e){
-  if(draggedTreasure){
-    draggedTreasure.classList.remove('dragging');
-    draggedTreasure.setAttribute('aria-grabbed', 'false');
-  }
-  draggedTreasure = null;
-}
-let vennKeyboardDragItem = null;
-function vennKeyboardDragStart(e){
-  if(e.key === ' ' || e.key === 'Enter'){
-    e.preventDefault();
-    if(vennKeyboardDragItem === e.target){
-      const dropzone = document.activeElement.closest('.dropzone-box');
-      if(dropzone && vennKeyboardDragItem){
-        dropzone.appendChild(vennKeyboardDragItem);
-        vennKeyboardDragItem.classList.remove('dragging');
-        vennKeyboardDragItem.setAttribute('aria-grabbed', 'false');
-        vennKeyboardDragItem = null;
-        document.getElementById('venn-feedback').textContent = "";
-      } else {
-        vennKeyboardDragItem.classList.remove('dragging');
-        vennKeyboardDragItem.setAttribute('aria-grabbed', 'false');
-        vennKeyboardDragItem = null;
-      }
-    } else {
-      if(vennKeyboardDragItem){
-        vennKeyboardDragItem.classList.remove('dragging');
-        vennKeyboardDragItem.setAttribute('aria-grabbed', 'false');
-      }
-      vennKeyboardDragItem = e.target;
-      vennKeyboardDragItem.classList.add('dragging');
-      vennKeyboardDragItem.setAttribute('aria-grabbed', 'true');
-    }
-  }
-  if(e.key === 'Escape' && vennKeyboardDragItem){
-    vennKeyboardDragItem.classList.remove('dragging');
-    vennKeyboardDragItem.setAttribute('aria-grabbed', 'false');
-    vennKeyboardDragItem = null;
-  }
-}
-Object.values(dropzonesBoxes).forEach(dz => {
-  dz.addEventListener('dragover', e => {
-    e.preventDefault();
-    dz.classList.add('highlight');
-    dz.setAttribute('aria-dropeffect', 'move');
-  });
-  dz.addEventListener('dragleave', e => {
-    dz.classList.remove('highlight');
-    dz.setAttribute('aria-dropeffect', 'none');
-  });
-  dz.addEventListener('drop', e => {
-    e.preventDefault();
-    dz.classList.remove('highlight');
-    const id = e.dataTransfer.getData('text/plain');
-    const treasure = document.getElementById(id);
-    if(treasure){
-      dz.appendChild(treasure);
-      dz.setAttribute('aria-dropeffect', 'none');
-      document.getElementById('venn-feedback').textContent = "";
-    }
-  });
-});
+let vennData = randomVennData();
 
-document.getElementById('check-venn-hunt').onclick = function(){
-  let correct = true;
-  for(let i=0; i < treasuresData.length; i++){
-    const treasure = document.getElementById('treasure-'+i);
-    const parentBox = treasure.parentNode;
-    // Must be a dropzone-box, and correct region
-    if(!parentBox.classList.contains('dropzone-box') ||
-       parentBox.dataset.region !== treasuresData[i].region) {
-      correct = false;
-      break;
-    }
-  }
-  const feedback = document.getElementById('venn-feedback');
-  if(correct) {
-    feedback.textContent = "🎉 Perfect! All treasures are in the right region.";
-    feedback.className = "feedback correct";
-  } else {
-    feedback.textContent = "❌ Some treasures are in the wrong region. Try again!";
-    feedback.className = "feedback incorrect";
-  }
-};
-document.getElementById('reset-venn-hunt').onclick = function(){
+function drawVenn(){
+  const {A,B,overlap,total} = vennData;
+  // Plotly traces for Venn circles
+  let traceA = {
+    x:[1], y:[1.5], text:`A<br>${A}`, mode:'text', name:'A', textfont:{size:20}, showlegend:false
+  };
+  let traceB = {
+    x:[2], y:[1.5], text:`B<br>${B}`, mode:'text', name:'B', textfont:{size:20}, showlegend:false
+  };
+  let traceOverlap = {
+    x:[1.5], y:[1.5], text:`Overlap<br>${overlap}`,mode:'text', name:'Overlap', textfont:{size:18}, showlegend:false
+  };
+  // Draw circles as shapes
+  let shapeA = {type:'circle', xref:'x', yref:'y', x0:0.7, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3}, fillcolor:'rgba(33,150,243,0.1)'};
+  let shapeB = {type:'circle', xref:'x', yref:'y', x0:1.3, y0:1, x1:2.3, y1:2, line:{color:'#52be80', width:3}, fillcolor:'rgba(46,204,113,0.1)'};
+  Plotly.newPlot('venn-plot', [traceA, traceB, traceOverlap], {
+    title:"Venn Diagram",
+    xaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
+    yaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
+    shapes:[shapeA, shapeB],
+    margin:{t:60,l:0,r:0,b:0}
+  });
+}
+function newVenn(){
+  vennData = randomVennData();
+  drawVenn();
+  document.getElementById('venn-desc').innerHTML =
+    `<b>There are ${vennData.total} people in total.<br>
+    Set A has ${vennData.A} people.<br>
+    Set B has ${vennData.B} people.<br>
+    Some are in both sets.</b>`;
+  document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
-  treasuresData.forEach((treasure, i) => {
-    const t = document.getElementById('treasure-'+i);
-    if(t && t.parentNode && t.parentNode.classList.contains('dropzone-box')){
-      vennDiagramDiv.appendChild(t);
-      t.style.top = '';
-      t.style.left = '';
-      if(treasure.region === 'Both'){
-        t.style.top = '95px'; t.style.left = '165px';
-      } else if(treasure.region === 'Aonly'){
-        t.style.top = '65px'; t.style.left = '110px';
-      } else if(treasure.region === 'Bonly'){
-        t.style.top = '65px'; t.style.left = '230px';
-      } else if(treasure.region === 'Neither'){
-        t.style.top = '190px'; t.style.left = '170px';
-      }
-    }
-  });
+}
+document.getElementById('new-venn').onclick=newVenn;
+document.getElementById('reset-venn').onclick=function(){
+  document.getElementById('venn-form').reset();
+  document.getElementById('venn-feedback').textContent = "";
 };
-// End of script
+document.getElementById('venn-form').onsubmit=function(e){
+  e.preventDefault();
+  const guess = parseInt(document.getElementById('venn-overlap').value);
+  if(guess === vennData.overlap){
+    document.getElementById('venn-feedback').innerHTML = "<span class='correct'>🎉 Correct!</span>";
+  } else {
+    document.getElementById('venn-feedback').innerHTML = "<span class='incorrect'>❌ Not right. Try again!</span>";
+  }
+};
+newVenn();
 </script>
 </body>
 </html>
