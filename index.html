@@ -185,28 +185,37 @@ document.getElementById('show-hint-exclusive').onclick = function(){
 const tableExamples = [
   {
     desc:"Fill in the table for 'Favorite Fruit vs Likes Chocolate'.",
-    rowHeads:["Apple","Banana"], colHeads:["Likes Chocolate","Doesn't Like Chocolate"],
+    rowHeads:["Apple","Banana"], 
+    colHeads:["Likes Chocolate","Doesn't Like Chocolate"],
     matrix:[[8,3],[5,4]]
   },
   {
     desc:"Fill in the table for 'Season vs Likes Swimming'.",
-    rowHeads:["Summer","Winter"],colHeads:["Likes Swimming","Doesn't Like Swimming"],
+    rowHeads:["Summer","Winter"],
+    colHeads:["Likes Swimming","Doesn't Like Swimming"],
     matrix:[[10,2],[3,8]]
   },
   {
     desc:"Fill in the table for 'Gender vs Likes Pizza'.",
-    rowHeads:["Boy","Girl"],colHeads:["Likes Pizza","Doesn't Like Pizza"],
+    rowHeads:["Boy","Girl"],
+    colHeads:["Likes Pizza","Doesn't Like Pizza"],
     matrix:[[9,4],[7,5]]
   }
 ];
 let tableIdx = 0;
 let tablePreset = null;
 
+function parseCellValue(id) {
+  const raw = document.getElementById(id).value;
+  if(raw === null || raw.trim() === "") return 0;
+  if(!/^\d+$/.test(raw.trim())) return 0;
+  return parseInt(raw.trim(),10);
+}
 function updateTotals() {
-  const c11 = tablePreset.matrix[0][0];
-  const c12 = tablePreset.matrix[0][1];
-  const c21 = tablePreset.matrix[1][0];
-  const c22 = tablePreset.matrix[1][1];
+  const c11 = parseCellValue('cell11');
+  const c12 = parseCellValue('cell12');
+  const c21 = parseCellValue('cell21');
+  const c22 = parseCellValue('cell22');
 
   const row1Total = c11 + c12;
   const row2Total = c21 + c22;
@@ -231,7 +240,7 @@ function newTableExample() {
   document.getElementById('colHead1').textContent = ex.colHeads[0];
   document.getElementById('colHead2').textContent = ex.colHeads[1];
   // Fill table with blanks
-  ['cell11','cell12','cell21','cell22'].forEach((id,i) => {
+  ['cell11','cell12','cell21','cell22'].forEach((id) => {
     document.getElementById(id).value = "";
   });
   updateTotals();
@@ -282,21 +291,26 @@ function drawVennFromTable(A, B, overlap, total, labelA, labelB) {
     Overlap: ${overlap}</b>`;
 }
 
-// On submit (or page load), show Venn for preset data
 document.getElementById('table-check').onclick = function(){
-  updateTotals();
-  document.getElementById('table-feedback').textContent = "";
-
-  const c11  = tablePreset.matrix[0][0];
-  const c12  = tablePreset.matrix[0][1];
-  const c21  = tablePreset.matrix[1][0];
-  const c22  = tablePreset.matrix[1][1];
-  const A    = c11 + c12;
-  const B    = c11 + c21;
+  // Get values from preset matrix if table fields are empty, else from fields
+  let c11 = parseCellValue('cell11');
+  let c12 = parseCellValue('cell12');
+  let c21 = parseCellValue('cell21');
+  let c22 = parseCellValue('cell22');
+  // If all fields empty, use preset
+  if(['cell11','cell12','cell21','cell22'].every(id => document.getElementById(id).value === "")){
+    c11 = tablePreset.matrix[0][0];
+    c12 = tablePreset.matrix[0][1];
+    c21 = tablePreset.matrix[1][0];
+    c22 = tablePreset.matrix[1][1];
+  }
+  // Interpret as Venn
+  const A = c11 + c12;
+  const B = c11 + c21;
   const overlap = c11;
-  const total  = A + c21 + c12 + c22;
-  const labelA = tablePreset.rowHeads[0];
-  const labelB = tablePreset.colHeads[0];
+  const total = c11 + c12 + c21 + c22;
+  const labelA = document.getElementById('rowHead1').textContent;
+  const labelB = document.getElementById('colHead1').textContent;
 
   drawVennFromTable(A, B, overlap, total, labelA, labelB);
 };
