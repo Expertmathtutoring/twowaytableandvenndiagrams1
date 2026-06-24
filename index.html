@@ -47,7 +47,7 @@
         <label for="non-mutual">No</label>
         <button type="submit">Submit</button>
       </form>
-      <div id="exclusive-feedback"></div>
+      <div id="exclusive-feedback" role="alert" aria-live="assertive"></div>
     </div>
   </div>
 </div>
@@ -250,23 +250,24 @@ function randomVennData(){
   let A = Math.floor(Math.random()*total/2)+4; 
   let B = Math.floor(Math.random()*total/2)+4;
   let overlap = Math.floor(Math.min(A,B)/2)+1;
-  return {total, A, B, overlap, 
-          Aonly: A - overlap,
-          Bonly: B - overlap,
-          neither: 0
-         };
+  return {
+    total, 
+    Aonly: A - overlap,
+    Bonly: B - overlap,
+    overlap,
+    neither: total - (A - overlap + B - overlap + overlap)
+  };
 }
 
 let vennData = randomVennData();
-vennData.neither = vennData.total - (vennData.Aonly + vennData.Bonly + vennData.overlap);
 
 function drawVenn(){
   const {Aonly, Bonly, overlap, neither} = vennData;
   let traceA = {
-    x:[1], y:[1.5], text:`Set A: ${vennData.Aonly+overlap}`, mode:'text', showlegend:false, textfont:{size:20, color:'#2980b9'}
+    x:[1], y:[1.5], text:`Set A: ${Aonly+overlap}`, mode:'text', showlegend:false, textfont:{size:20, color:'#2980b9'}
   };
   let traceB = {
-    x:[2], y:[1.5], text:`Set B: ${vennData.Bonly+overlap}`, mode:'text', showlegend:false, textfont:{size:20, color:'#27ae60'}
+    x:[2], y:[1.5], text:`Set B: ${Bonly+overlap}`, mode:'text', showlegend:false, textfont:{size:20, color:'#27ae60'}
   };
   let traceOverlap = {
     x:[1.5], y:[1.5], text:`Overlap: ${overlap}`, mode:'text', showlegend:false, textfont:{size:18, color:'#b7950b'}
@@ -286,7 +287,6 @@ function drawVenn(){
 }
 function newVenn(){
   vennData = randomVennData();
-  vennData.neither = vennData.total - (vennData.Aonly + vennData.Bonly + vennData.overlap);
   drawVenn();
   document.getElementById('venn-desc').innerHTML =
     `<b>There are ${vennData.total} people in total.<br>
@@ -312,5 +312,6 @@ document.getElementById('venn-form').onsubmit=function(e){
 };
 newVenn();
 </script>
+
 </body>
 </html>
