@@ -2,394 +2,732 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</title>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<title>Fun Probability Activities - Mutually Exclusive, Two-Way Table, Venn Diagram</title>
 <style>
-body { font-family: Arial, sans-serif; max-width: 840px; margin: 20px auto; background: #eef6fa; }
-h1, h2 { color: #2980b9; text-align: center; }
-.section { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #b1c7db4d; margin-bottom: 35px; padding: 20px; }
-.flex { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
-.label { font-weight: bold; margin-right: 8px; }
-button { background: #2980b9; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; font-size: 1rem; cursor: pointer; margin-top: 12px; }
-button:hover { background: #21618c; }
-.input-small { width: 54px; }
-.correct { color: green; font-weight: bold; }
-.incorrect { color: red; font-weight: bold; }
-.table-wrap { overflow-x: auto; margin-top: 16px; }
-.table2 { border-collapse: collapse; width: 390px; background: #f9f9fa; }
-.table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-.table2 th { background: #d4e6f1; }
-.table2 input[readonly] { background: #e1e8f0; }
-.venn-wrap, .venn-table-wrap { width: 420px; height: 320px; margin: 0 auto 20px;}
-.venn-table-legend, .venn-legend { width: 420px; margin:0 auto; margin-bottom: 12px;}
-.venn-table-legend span, .venn-legend span { display:inline-block; margin-right:12px; padding:2px 10px; border-radius:5px;}
-.venn-table-legend .onlyA, .venn-legend .onlyA { background:#85c1e9; }
-.venn-table-legend .onlyB, .venn-legend .onlyB { background:#abebc6;}
-.venn-table-legend .both, .venn-legend .both { background:#f7ca18; }
-.venn-table-legend .neither, .venn-legend .neither { background:#d5dbdb; }
-.hint-box {
-  background: #d9edf7;
-  border-left: 5px solid #31708f;
-  padding: 10px 15px;
-  margin-top: 10px;
-  font-size: 0.95rem;
-  display: none;
-  border-radius: 4px;
-  color: #31708f;
-}
-.summary-top, .venn-summary-top { font-size:1.1em; margin:12px 0; color:#2980b9; }
-.var-label-row { margin-top:10px; font-weight:bold; color:#2980b9; }
-.var-label-col { margin-bottom:10px; font-weight:bold; color:#2980b9; }
-.colsubtitle, .rowsubtitle { font-size:0.98em; color:#56606a; display:block; }
-.th-mainhead { font-size:1.1em; color:#154360; }
-@media (max-width: 600px){
-  .venn-wrap, .venn-table-wrap { width: 99vw; height: 220px;}
-  .venn-table-legend, .venn-legend { width:99vw;}
-  .table2 { width: 96vw;}
-  .flex { flex-direction: column; }
-}
+  body {
+    font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; background: #eef6fa; color: #153e7e;
+  }
+  h1, h2 {
+    color: #1a5276; text-align: center;
+  }
+  .section {
+    background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #b1c7db4d; margin-bottom: 40px; padding: 20px;
+  }
+  button {
+    background: #1a5276; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; font-size: 1rem; cursor: pointer; margin-top: 12px;
+  }
+  button:hover {
+    background: #154360;
+  }
+  .label {
+    font-weight: bold;
+    margin-right: 8px;
+  }
+  .feedback {
+    margin-top: 12px; font-weight: bold;
+  }
+  .feedback.correct {
+    color: green;
+  }
+  .feedback.incorrect {
+    color: red;
+  }
+  .hint-box {
+    background: #d9edf7;
+    border-left: 5px solid #31708f;
+    padding: 10px 15px;
+    margin-top: 10px;
+    font-size: 0.95rem;
+    display: none;
+    border-radius: 4px;
+    color: #31708f;
+  }
+  /* Activity 2 layout */
+  #mystery-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
+  #mystery-list li {
+    background: #5499c7;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: grab;
+    user-select: none;
+    font-weight: bold;
+  }
+  #mystery-list li.dragging {
+    opacity: 0.5;
+  }
+  table {
+    border-collapse: collapse;
+    margin: 0 auto 20px auto;
+  }
+  th, td {
+    border: 2px solid #154360;
+    padding: 18px 25px;
+    min-width: 90px;
+    text-align: center;
+    vertical-align: middle;
+    background: #d6eaf8;
+    font-weight: bold;
+    font-size: 1.05rem;
+  }
+  th {
+    background: #1a5276;
+    color: white;
+  }
+  td.dropzone {
+    background: #ebf5fb;
+    font-weight: normal;
+    cursor: pointer;
+    min-height: 50px;
+  }
+  td.dropzone:hover {
+    background-color: #aed6f1;
+  }
+  td.dropzone.filled {
+    background-color: #85c1e9;
+    color: white;
+    cursor: default;
+  }
+  /* Activity 3 layout */
+  #venn-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  #venn-diagram {
+    position: relative;
+    width: 400px; height: 260px;
+  }
+  .circle {
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    border: 4px solid;
+  }
+  #circleA {
+    top: 20px; left: 70px;
+    border-color: #2980b9;
+    background: rgba(41,128,185,0.15);
+    z-index: 2;
+  }
+  #circleB {
+    top: 20px; left: 160px;
+    border-color: #27ae60;
+    background: rgba(39,174,96,0.15);
+    z-index: 2;
+  }
+  .venn-region {
+    position: absolute;
+    background: #f7f9fa;
+    border-radius: 12px;
+    border: 2px solid #777;
+    padding: 6px 10px;
+    font-weight: bold;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: background-color 0.3s;
+  }
+  .venn-region.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+  }
+  #reg-Aonly {
+    top: 65px; left: 110px;
+    width: 65px; text-align: center;
+  }
+  #reg-Bonly {
+    top: 65px; left: 230px;
+    width: 65px; text-align: center;
+  }
+  #reg-Both {
+    top: 110px; left: 165px;
+    width: 60px; text-align: center;
+  }
+  #reg-Neither {
+    top: 190px; left: 170px;
+    width: 80px; text-align: center;
+  }
+  #dropzones {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .dropzone-box {
+    border: 2px dashed #2980b9;
+    border-radius: 8px;
+    width: 140px;
+    height: 70px;
+    padding: 10px;
+    text-align: center;
+    color: #2980b9;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  .dropzone-box.highlight {
+    border-color: #27ae60;
+    background-color: #d4efdf;
+  }
+  #venn-feedback {
+    margin-top: 16px;
+    font-weight: bold;
+  }
+  #venn-feedback.correct {
+    color: green;
+  }
+  #venn-feedback.incorrect {
+    color: red;
+  }
+  /* Accessibility enhancements */
+  li[draggable="true"]:focus, .dropzone-box:focus {
+    outline: 2px solid #27ae60;
+    outline-offset: 4px;
+  }
+  /* Responsive */
+  @media(max-width:700px) {
+    #venn-container {
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+    }
+    #venn-diagram {
+      width: 90vw; height: 220px;
+    }
+  }
 </style>
 </head>
 <body>
-<h1>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</h1>
+<h1>Fun Probability Activities</h1>
 
-<div class="section" id="exclusive-section">
-  <h2>1. Mutually vs Non-Mutually Exclusive Events</h2>
-  <div class="flex">
-    <div>
-      <div id="event-desc"></div>
-      <button id="show-hint-exclusive" type="button">Show Hint</button>
-      <div id="hint-exclusive" class="hint-box">
-        <strong>Hint:</strong> Mutually exclusive events cannot happen at the same time. Ask yourself: can both events occur simultaneously? If yes, then they are <em>not</em> mutually exclusive.
+<!-- ACTIVITY 1: Mutually Exclusive Events -->
+<div class="section" id="activity1">
+  <h2>1. Mutually Exclusive Events</h2>
+  <p id="event-desc" style="font-weight:bold;"></p>
+  <form id="exclusive-form" aria-describedby="hint-exclusive">
+    <fieldset>
+      <legend>Are these events mutually exclusive?</legend>
+      <label>
+        <input type="radio" name="exclusive" value="mutual" required> Yes
+      </label>
+      <label>
+        <input type="radio" name="exclusive" value="non-mutual"> No
+      </label>
+    </fieldset>
+    <button type="submit">Submit</button>
+  </form>
+  <button id="show-hint-exclusive" aria-expanded="false" aria-controls="hint-exclusive">Show Hint</button>
+  <div id="hint-exclusive" class="hint-box" aria-live="polite">
+    Mutually exclusive events cannot happen together. If events can happen simultaneously, they are not mutually exclusive.
+  </div>
+  <p id="exclusive-feedback" class="feedback" aria-live="polite"></p>
+  <button id="new-event">New Example</button>
+</div>
+
+<!-- ACTIVITY 2: Two-way Table Mystery Sorting -->
+<div class="section" id="activity2">
+  <h2>2. Two-way Table: Mystery Sorting</h2>
+  <p id="table-instruction" style="font-weight:bold; text-align:center;">Drag the students into the correct boxes.</p>
+  <ul id="mystery-list" aria-label="List of students to sort" tabindex="0">
+    <!-- generated by JS -->
+  </ul>
+
+  <table aria-label="Two-way table">
+    <thead>
+      <tr>
+        <th>A / Fruit</th>
+        <th>Likes Chocolate</th>
+        <th>Does Not Like Chocolate</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Apple</th>
+        <td id="Apple-Likes Chocolate" class="dropzone" tabindex="0" aria-dropeffect="none" aria-label="Drop students who like chocolate and favorite fruit is apple">Drop Here</td>
+        <td id="Apple-Does Not Like Chocolate" class="dropzone" tabindex="0" aria-dropeffect="none" aria-label="Drop students who do not like chocolate and favorite fruit is apple">Drop Here</td>
+      </tr>
+      <tr>
+        <th>Banana</th>
+        <td id="Banana-Likes Chocolate" class="dropzone" tabindex="0" aria-dropeffect="none" aria-label="Drop students who like chocolate and favorite fruit is banana">Drop Here</td>
+        <td id="Banana-Does Not Like Chocolate" class="dropzone" tabindex="0" aria-dropeffect="none" aria-label="Drop students who do not like chocolate and favorite fruit is banana">Drop Here</td>
+      </tr>
+    </tbody>
+  </table>
+  <button id="check-sort">Check Sort & Show Summary</button>
+  <p id="sort-feedback" class="feedback" aria-live="polite"></p>
+
+  <div id="venn-from-sort" style="width:420px; height:320px; margin: 0 auto;"></div>
+</div>
+
+<!-- ACTIVITY 3: Venn Diagram Treasure Hunt -->
+<div class="section" id="activity3">
+  <h2>3. Venn Diagram Treasure Hunt</h2>
+  <p>Drag each treasure to the correct Venn diagram region.</p>
+  <div id="venn-container" aria-label="Interactive Venn Diagram Treasure Hunt">
+      <div id="venn-diagram" aria-hidden="true" role="img">
+        <div id="circleA" class="circle" aria-label="Set A circle"></div>
+        <div id="circleB" class="circle" aria-label="Set B circle"></div>
+        <!-- Treasures will be placed here -->
       </div>
-      <button id="new-event">New Example</button>
-      <button id="reset-event">Reset</button>
-      <form id="exclusive-form" style="margin-top:12px;">
-        <label class="label">Are these events mutually exclusive?</label>
-        <input type="radio" name="exclusive" value="mutual" id="mutual" required>
-        <label for="mutual">Yes</label>
-        <input type="radio" name="exclusive" value="non-mutual" id="non-mutual">
-        <label for="non-mutual">No</label>
-        <button type="submit">Submit</button>
-      </form>
-      <div id="exclusive-feedback"></div>
-    </div>
   </div>
-</div>
-
-<div class="section" id="table-section">
-  <h2>2. Two-way Table Activity</h2>
-  <div>
-    <div id="table-question"></div>
-    <div class="var-label-row" id="table-row-label"></div>
-    <div class="var-label-col" id="table-col-label"></div>
-    <div class="summary-top" id="table-summary-top"></div>
-    <button id="show-hint-table" type="button">Show Hint</button>
-    <div id="hint-table" class="hint-box">
-      <strong>Hint:</strong> Read carefully the categories for rows and columns. Fill in the table by entering the number of individuals in each group. Double check if the sum of rows and columns make logical sense.
-    </div>
-    <button id="new-table">New Table</button>
-    <button id="reset-table">Reset</button>
-    <div class="table-wrap">
-      <table class="table2" id="table2" aria-label="Two-way table with totals">
-        <tr>
-          <th>
-            <span class="th-mainhead" id="rowMainHead"></span><br>
-            <span class="rowsubtitle" id="rowSubhead1"></span>
-          </th>
-          <th>
-            <span class="th-mainhead" id="colMainHead1"></span><br>
-            <span class="colsubtitle" id="colSubhead1"></span>
-          </th>
-          <th>
-            <span class="th-mainhead" id="colMainHead2"></span><br>
-            <span class="colsubtitle" id="colSubhead2"></span>
-          </th>
-          <th>Total</th>
-        </tr>
-        <tr>
-          <th>
-            <span class="th-mainhead" id="rowSubMainHead1"></span>
-            <span class="rowsubtitle" id="rowSubSubhead1"></span>
-          </th>
-          <td><input class="input-small" id="cell11" type="number" min="0" pattern="\d+" inputmode="numeric" step="1"></td>
-          <td><input class="input-small" id="cell12" type="number" min="0" pattern="\d+" inputmode="numeric" step="1"></td>
-          <td><input class="input-small" id="rowTotal1" type="number" readonly></td>
-        </tr>
-        <tr>
-          <th>
-            <span class="th-mainhead" id="rowSubMainHead2"></span>
-            <span class="rowsubtitle" id="rowSubSubhead2"></span>
-          </th>
-          <td><input class="input-small" id="cell21" type="number" min="0" pattern="\d+" inputmode="numeric" step="1"></td>
-          <td><input class="input-small" id="cell22" type="number" min="0" pattern="\d+" inputmode="numeric" step="1"></td>
-          <td><input class="input-small" id="rowTotal2" type="number" readonly></td>
-        </tr>
-        <tr>
-          <th>Total</th>
-          <td><input class="input-small" id="colTotal1" type="number" readonly></td>
-          <td><input class="input-small" id="colTotal2" type="number" readonly></td>
-          <td><input class="input-small" id="grandTotal" type="number" readonly></td>
-        </tr>
-      </table>
-    </div>
-    <button id="table-check">Submit Table</button>
-    <div id="table-feedback"></div>
-    <div class="venn-table-legend">
-      <span class="onlyA">Only <span id="onlyAName"></span></span>
-      <span class="onlyB">Only <span id="onlyBName"></span></span>
-      <span class="both">Both</span>
-      <span class="neither">Neither</span>
-    </div>
-    <div id="table-desc-venn"></div>
-    <div class="venn-table-wrap" id="venn-table-plot-q" role="img" aria-label="Venn diagram for question"></div>
-    <div class="venn-table-wrap" id="venn-table-plot-user" role="img" aria-label="Venn diagram for user"></div>
+  <div id="dropzones" aria-label="Venn diagram regions drop zones">
+    <div tabindex="0" class="dropzone-box" id="drop-Aonly" data-region="Aonly" aria-dropeffect="none" aria-label="Drop treasures here that belong to only set A">A only</div>
+    <div tabindex="0" class="dropzone-box" id="drop-Bonly" data-region="Bonly" aria-dropeffect="none" aria-label="Drop treasures here that belong to only set B">B only</div>
+    <div tabindex="0" class="dropzone-box" id="drop-Both" data-region="Both" aria-dropeffect="none" aria-label="Drop treasures here that belong to the overlap of sets A and B">Both</div>
+    <div tabindex="0" class="dropzone-box" id="drop-Neither" data-region="Neither" aria-dropeffect="none" aria-label="Drop treasures here that belong to neither set A nor B">Neither</div>
   </div>
-</div>
-
-<div class="section" id="venn-section">
-  <h2>3. Fill in Venn Diagram Regions</h2>
-  <div>
-    <div class="venn-summary-top" id="venn-summary-top"></div>
-    <button id="new-venn-q">New Venn Question</button>
-    <button id="reset-venn-q">Reset</button>
-    <div class="venn-legend">
-      <span class="onlyA">A only</span>
-      <span class="onlyB">B only</span>
-      <span class="both">Overlap</span>
-      <span class="neither">Neither</span>
-    </div>
-    <div class="venn-wrap" id="venn-q-plot"></div>
-    <form id="venn-answer-form" style="margin-top:16px;">
-      <label class="label" for="vennAOnly">A only:</label>
-      <input type="number" id="vennAOnly" class="input-small" min="0" required />
-      <label class="label" for="vennBOnly">B only:</label>
-      <input type="number" id="vennBOnly" class="input-small" min="0" required />
-      <label class="label" for="vennBoth">Overlap:</label>
-      <input type="number" id="vennBoth" class="input-small" min="0" required />
-      <label class="label" for="vennNeither">Neither:</label>
-      <input type="number" id="vennNeither" class="input-small" min="0" required /><br>
-      <button type="submit">Submit Answer</button>
-    </form>
-    <div id="venn-q-feedback"></div>
-  </div>
+  <p id="venn-feedback" class="feedback" aria-live="polite"></p>
+  <button id="check-venn-hunt">Check Answers</button>
+  <button id="reset-venn-hunt">Reset Treasures</button>
 </div>
 
 <script>
-// ------------------- ACTIVITY 2 -------------------
-const tableExamples = [
-  {
-    desc:"Fill in the table for 'Favorite Fruit vs Likes Chocolate'.",
-    question:"Below is a survey of students' favorite fruit and whether they like chocolate. Complete the table.",
-    A:"Apple", A_sub:"Fruit: Apple",
-    B:"Banana", B_sub:"Fruit: Banana",
-    colA:"Likes Chocolate", colA_sub:"Chocolate: Like",
-    colB:"Doesn't Like Chocolate", colB_sub:"Chocolate: Don't like",
-    matrix:[[8,3],[5,4]]
-  },
-  {
-    desc:"Fill in the table for 'Season vs Likes Swimming'.",
-    question:"Here is a survey by season and whether students like swimming.",
-    A:"Summer", A_sub:"Season: Summer",
-    B:"Winter", B_sub:"Season: Winter",
-    colA:"Likes Swimming", colA_sub:"Swimming: Like",
-    colB:"Doesn't Like Swimming", colB_sub:"Swimming: Don't like",
-    matrix:[[10,2],[3,8]]
-  },
-  {
-    desc:"Fill in the table for 'Gender vs Likes Pizza'.",
-    question:"Here is a survey by gender and whether students like pizza.",
-    A:"Boy", A_sub:"Gender: Boy",
-    B:"Girl", B_sub:"Gender: Girl",
-    colA:"Likes Pizza", colA_sub:"Pizza: Like",
-    colB:"Doesn't Like Pizza", colB_sub:"Pizza: Don't like",
-    matrix:[[9,4],[7,5]]
-  }
+/* --- ACTIVITY 1: Mutually Exclusive Events --- */
+const eventExamples = [
+  {desc:"Rolling a die: Event A is getting an even number; Event B is getting an odd number.", mutual:true},
+  {desc:"Drawing a card: Event A is drawing a red card; Event B is drawing a King.", mutual:false},
+  {desc:"Flipping a coin: Event A is getting heads; Event B is getting tails.", mutual:true},
+  {desc:"Picking a student: Event A is a girl; Event B is student who wears glasses.", mutual:false},
+  {desc:"Choosing a day: Event A is a weekend; Event B is a day starting with 'S'.", mutual:false},
+  {desc:"Drawing a marble: Event A is blue; Event B is green.", mutual:true},
+  {desc:"Selecting a pet: Event A is a dog; Event B is a large animal.", mutual:false}
 ];
-let tableIdx = 0;
-let tablePreset = null;
-function parseCellValue(id) {
-  const raw = document.getElementById(id).value;
-  if(raw === null || raw.trim() === "") return 0;
-  if(!/^\d+$/.test(raw.trim())) return 0;
-  return parseInt(raw.trim(),10);
+
+let exclusiveCurrent = null;
+
+function newEventExample(){
+  const idx = Math.floor(Math.random()*eventExamples.length);
+  const example = eventExamples[idx];
+  document.getElementById('event-desc').textContent = example.desc;
+  exclusiveCurrent = example.mutual;
+  document.getElementById('exclusive-feedback').textContent = "";
+  document.getElementById('exclusive-form').reset();
+  document.getElementById('hint-exclusive').style.display = "none";
+  document.getElementById('show-hint-exclusive').setAttribute('aria-expanded', 'false');
 }
-function updateTotals() {
-  const a = parseCellValue('cell11'), b = parseCellValue('cell12'),
-        c = parseCellValue('cell21'), d = parseCellValue('cell22');
-  document.getElementById('rowTotal1').value = a + b;
-  document.getElementById('rowTotal2').value = c + d;
-  document.getElementById('colTotal1').value = a + c;
-  document.getElementById('colTotal2').value = b + d;
-  document.getElementById('grandTotal').value = a + b + c + d;
-}
-['cell11','cell12','cell21','cell22'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updateTotals);
-});
-function showTableSummary(a, b, c, d, A, colA) {
-  // Only A: b, Only B: c, Both: a, Neither: d
-  const setAonly = b, setBonly = c, overlap = a, neither = d;
-  // Only A + Only B + Neither = total (excluding overlap)
-  const total = setAonly + setBonly + neither;
-  const setA = setAonly + overlap;
-  const setB = setBonly + overlap;
-  document.getElementById('table-summary-top').innerHTML =
-    `<b>Total (excluding overlap):</b> ${total} | <b>${A} only:</b> ${setAonly} | <b>${colA} only:</b> ${setBonly} | <b>Overlap:</b> ${overlap} | <b>Neither:</b> ${neither} | <b>${A} total:</b> ${setA} | <b>${colA} total:</b> ${setB}`;
-  document.getElementById('onlyAName').textContent = A;
-  document.getElementById('onlyBName').textContent = colA;
-}
-function drawVennFull(a, b, c, d, A, colA, plotDivId, titleTag) {
-  // Only A: b, Only B: c, Both: a, Neither: d
-  Plotly.newPlot(plotDivId, [], {
-      title: `${titleTag} ${A} & ${colA}`,
-      xaxis:{range:[0,2.4], showgrid:false, zeroline:false, showticklabels:false},
-      yaxis:{range:[0,2.5], showgrid:false, zeroline:false, showticklabels:false},
-      shapes:[
-        {type:'circle', xref:'x', yref:'y', x0:0.8, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3}, fillcolor:'rgba(33,150,243,0.12)'},
-        {type:'circle', xref:'x', yref:'y', x0:1.25, y0:1, x1:2.15, y1:2, line:{color:'#52be80', width:3}, fillcolor:'rgba(46,204,113,0.09)'}
-      ],
-      margin:{t:70,l:0,r:0,b:0},
-      annotations:[
-        {x:1, y:2.05, text:`${A} only: ${b}`, font:{size:15, color:'#2980b9'}, showarrow:false, bgcolor:'#85c1e9', borderpad:4},
-        {x:2, y:2.05, text:`${colA} only: ${c}`, font:{size:15, color:'#27ae60'}, showarrow:false, bgcolor:'#abebc6', borderpad:4},
-        {x:1.45, y:1.5, text:`Both: ${a}`, font:{size:15, color:'#b7950b'}, showarrow:false, bgcolor:'#f7ca18', borderpad:5},
-        {x:0.45, y:0.65, text:`Neither: ${d}`, font:{size:14, color:'#616161'}, showarrow:false, bgcolor:'#d5dbdb', borderpad:4}
-      ]
-    }, {displayModeBar:false}
-  );
-}
-function newTableExample() {
-  tableIdx = Math.floor(Math.random()*tableExamples.length);
-  tablePreset = tableExamples[tableIdx];
-  const ex = tablePreset;
-  document.getElementById('table-question').innerHTML = `<b>${ex.question}</b>`;
-  document.getElementById('rowMainHead').textContent = "A (Row)";
-  document.getElementById('rowSubhead1').textContent = `${ex.A_sub}`;
-  document.getElementById('colMainHead1').textContent = "B (Column)";
-  document.getElementById('colSubhead1').textContent = `${ex.colA_sub}`;
-  document.getElementById('colMainHead2').textContent = "Not B (Column)";
-  document.getElementById('colSubhead2').textContent = `${ex.colB_sub}`;
-  document.getElementById('rowSubMainHead1').textContent = ex.A;
-  document.getElementById('rowSubSubhead1').textContent = ex.A_sub;
-  document.getElementById('rowSubMainHead2').textContent = ex.B;
-  document.getElementById('rowSubSubhead2').textContent = ex.B_sub;
-  ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach((id) => {
-    document.getElementById(id).value = "";
-  });
-  updateTotals();
-  let a = ex.matrix[0][0], b = ex.matrix[0][1], c = ex.matrix[1][0], d = ex.matrix[1][1];
-  showTableSummary(a,b,c,d, ex.A, ex.colA);
-  drawVennFull(a,b,c,d, ex.A, ex.colA, 'venn-table-plot-q', 'Question:');
-  Plotly.purge('venn-table-plot-user');
-  document.getElementById('table-desc-venn').textContent = '';
-  document.getElementById('table-feedback').textContent = '';
-}
-document.getElementById('new-table').onclick = newTableExample;
-document.getElementById('reset-table').onclick = function(){
-  ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach(id => {
-    document.getElementById(id).value = "";
-  });
-  updateTotals();
-  let a = tablePreset.matrix[0][0], b = tablePreset.matrix[0][1],
-      c = tablePreset.matrix[1][0], d = tablePreset.matrix[1][1];
-  showTableSummary(a,b,c,d, tablePreset.A, tablePreset.colA);
-  drawVennFull(a,b,c,d, tablePreset.A, tablePreset.colA, 'venn-table-plot-q', 'Question:');
-  Plotly.purge('venn-table-plot-user');
-  document.getElementById('table-desc-venn').textContent = '';
-  document.getElementById('table-feedback').textContent = "";
-  document.getElementById('hint-table').style.display = "none";
+document.getElementById('new-event').onclick = newEventExample;
+document.getElementById('show-hint-exclusive').onclick = function(){
+  const hint = document.getElementById('hint-exclusive');
+  let exp = this.getAttribute('aria-expanded') === 'true';
+  hint.style.display = exp ? 'none' : 'block';
+  this.setAttribute('aria-expanded', !exp);
 };
-document.getElementById('table-check').onclick = function(){
-  let a = parseCellValue('cell11'), b = parseCellValue('cell12'),
-      c = parseCellValue('cell21'), d = parseCellValue('cell22');
-  if(['cell11','cell12','cell21','cell22'].every(id => document.getElementById(id).value === "")){
-    a = tablePreset.matrix[0][0]; b = tablePreset.matrix[0][1];
-    c = tablePreset.matrix[1][0]; d = tablePreset.matrix[1][1];
+document.getElementById('exclusive-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const val = document.querySelector('input[name="exclusive"]:checked').value;
+  const feedback = document.getElementById('exclusive-feedback');
+  if ((val === "mutual" && exclusiveCurrent) || (val === "non-mutual" && !exclusiveCurrent)) {
+    feedback.textContent = "🎉 Correct!";
+    feedback.className = "feedback correct";
+  } else {
+    feedback.textContent = "❌ Not correct. Try again!";
+    feedback.className = "feedback incorrect";
   }
-  const A = tablePreset.A, colA = tablePreset.colA;
-  updateTotals();
-  showTableSummary(a,b,c,d,A,colA);
-  drawVennFull(a,b,c,d,A,colA, 'venn-table-plot-user', 'Your table:');
+});
+newEventExample();
+
+/* --- ACTIVITY 2: Two-way Table Mystery Sorting --- */
+
+const students = [
+  {name:"Jane", row:"Apple", col:"Likes Chocolate"},
+  {name:"Mike", row:"Banana", col:"Does Not Like Chocolate"},
+  {name:"Alice", row:"Banana", col:"Likes Chocolate"},
+  {name:"Tom", row:"Apple", col:"Does Not Like Chocolate"},
+  {name:"Lara", row:"Apple", col:"Likes Chocolate"},
+  {name:"Ryan", row:"Banana", col:"Likes Chocolate"},
+  {name:"Nina", row:"Banana", col:"Does Not Like Chocolate"},
+  {name:"James", row:"Apple", col:"Does Not Like Chocolate"},
+];
+
+const rowCategories = ["Apple","Banana"];
+const colCategories = ["Likes Chocolate", "Does Not Like Chocolate"];
+
+const mysteryListUL = document.getElementById('mystery-list');
+const dropzones = {};
+
+rowCategories.forEach(r => {
+  colCategories.forEach(c => {
+    dropzones[`${r}-${c}`] = document.getElementById(`${r}-${c}`);
+  });
+});
+
+function createDraggableStudentElement(student){
+  const li = document.createElement('li');
+  li.textContent = student.name;
+  li.draggable = true;
+  li.setAttribute('aria-grabbed', 'false');
+  li.tabIndex = 0;
+  li.dataset.row = student.row;
+  li.dataset.col = student.col;
+  li.id = "stu-"+student.name;
+  li.addEventListener('dragstart', dragStart);
+  li.addEventListener('dragend', dragEnd);
+  // Keyboard support:
+  li.addEventListener('keydown', keyboardDragStart);
+  return li;
+}
+
+function rebuildMysteryList(){
+  mysteryListUL.innerHTML = "";
+  students.forEach(stu => {
+    const li = createDraggableStudentElement(stu);
+    mysteryListUL.appendChild(li);
+  });
+}
+
+let draggedElement = null;
+
+function dragStart(e){
+  draggedElement = e.target;
+  e.dataTransfer.setData('text/plain', draggedElement.id);
+  e.dataTransfer.effectAllowed = "move";
+  draggedElement.classList.add('dragging');
+  draggedElement.setAttribute('aria-grabbed', 'true');
+}
+function dragEnd(e){
+  if(draggedElement){
+    draggedElement.classList.remove('dragging');
+    draggedElement.setAttribute('aria-grabbed', 'false');
+  }
+  draggedElement = null;
+}
+// keyboard drag start for accessibility: space or enter to pick up, escape to cancel, arrows to move focus, space/enter again to drop
+let keyboardDragElement = null;
+function keyboardDragStart(e){
+  if(e.key === ' ' || e.key === 'Enter'){
+    e.preventDefault();
+    if(keyboardDragElement === e.target){
+      // drop
+      const dropzone = document.activeElement.closest('.dropzone');
+      if(dropzone && keyboardDragElement){
+        dropzone.appendChild(keyboardDragElement);
+        dropzone.classList.add('filled');
+        dropzone.setAttribute('aria-dropeffect', 'none');
+        keyboardDragElement = null;
+      }
+    }
+    else{
+      if(keyboardDragElement){
+        keyboardDragElement.classList.remove('dragging');
+        keyboardDragElement.setAttribute('aria-grabbed', 'false');
+      }
+      keyboardDragElement = e.target;
+      keyboardDragElement.classList.add('dragging');
+      keyboardDragElement.setAttribute('aria-grabbed', 'true');
+    }
+  }
+  if(e.key === 'Escape' && keyboardDragElement){
+    keyboardDragElement.classList.remove('dragging');
+    keyboardDragElement.setAttribute('aria-grabbed', 'false');
+    keyboardDragElement = null;
+  }
+}
+
+// Dropzone event handlers
+Object.values(dropzones).forEach(dz => {
+  dz.addEventListener('dragover', e => {
+    e.preventDefault();
+    dz.classList.add('highlight');
+  });
+  dz.addEventListener('dragleave', e => {
+    dz.classList.remove('highlight');
+  });
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('highlight');
+    const id = e.dataTransfer.getData('text/plain');
+    const draggedNode = document.getElementById(id);
+    if (draggedNode){
+      dz.appendChild(draggedNode);
+      dz.classList.add('filled');
+      dz.setAttribute('aria-dropeffect', 'none');
+    }
+  });
+});
+
+// Check correctness & summary
+document.getElementById("check-sort").onclick = function(){
+  // Count students per cell
+  const counts = {};
+  rowCategories.forEach(r => {
+    colCategories.forEach(c => {
+      counts[`${r}-${c}`] = 0;
+    });
+  });
+  // Count students still in original list
+  let unplacedCount = 0;
+  mysteryListUL.childNodes.forEach(li => {
+    if(li.nodeType === 1){
+      unplacedCount++;
+    }
+  });
+  Object.values(dropzones).forEach(dz => {
+    const key = dz.id;
+    counts[key] = dz.childNodes.length;
+  });
+
+  let correct = true;
+  // Expected counts from data:
+  // Apple Likes Chocolate
+  const expected = {
+    "Apple-Likes Chocolate": 2,  // Jane, Lara
+    "Apple-Does Not Like Chocolate": 2, // Tom, James
+    "Banana-Likes Chocolate": 2, // Alice, Ryan
+    "Banana-Does Not Like Chocolate": 2 // Mike, Nina
+  };
+  for(const k in expected){
+    if(counts[k] !== expected[k]){
+      correct = false;
+      break;
+    }
+  }
+
+  const feedback = document.getElementById('sort-feedback');
+  if(unplacedCount > 0){
+    feedback.textContent = "Please place all students into the correct boxes before checking.";
+    feedback.className = "feedback incorrect";
+    return;
+  }
+
+  if(correct){
+    feedback.textContent = "🎉 All students sorted correctly!";
+    feedback.className = "feedback correct";
+  }
+  else{
+    feedback.textContent = "❌ Some students are not sorted correctly. Try again!";
+    feedback.className = "feedback incorrect";
+  }
+
+  // Build data matrix for Venn from sorting:
+  // Overlap = students counted 'Apple' (row) AND 'Likes Chocolate' (col) --> This scenario is the "both" region? Because table is cross-classifying 2 variables we can interpret 2-way table cells as:
+  // Both set: cell 11 in the previous model is Overlap? Actually, no, here table is counts for categories. We'll interpret for Venn:
+  // Let's define sets A and B as:
+  // A = "Favorite fruit is Apple"
+  // B = "Likes Chocolate"
+  // Then:
+  // Both: students who like chocolate AND favorite fruit is apple => cell "Apple-Likes Chocolate"
+  // Only A: Students favorite fruit Apple but do NOT like chocolate => "Apple-Does Not Like Chocolate"
+  // Only B: Favorite fruit Banana but Likes Chocolate => "Banana-Likes Chocolate"
+  // Neither: Banana and Does Not Like Chocolate
+
+  const overlap = counts["Apple-Likes Chocolate"] || 0;
+  const onlyA = counts["Apple-Does Not Like Chocolate"] || 0;
+  const onlyB = counts["Banana-Likes Chocolate"] || 0;
+  const neither = counts["Banana-Does Not Like Chocolate"] || 0;
+
+  drawVennFromSort({onlyA, onlyB, overlap, neither});
 };
 
-// ------------------- ACTIVITY 3 -------------------
-const vennQs = [
-  {
-    sets: {A: "students who like dogs", B: "students who like cats"},
-    values: {Aonly: 5, Bonly: 7, Both: 3, Neither: 2}
-  },
-  {
-    sets: {A: "students in Year 10", B: "students who play soccer"},
-    values: {Aonly: 11, Bonly: 6, Both: 4, Neither: 8}
-  },
-  {
-    sets: {A: "students who prefer pizza", B: "students who prefer pasta"},
-    values: {Aonly: 8, Bonly: 5, Both: 2, Neither: 6}
-  }
+function drawVennFromSort(data){
+  const plotId = 'venn-from-sort';
+  const {onlyA, onlyB, overlap, neither} = data;
+  Plotly.newPlot(plotId, [], {
+    shapes:[
+      {type:'circle', xref:'x', yref:'y', x0:0.85, y0:1, x1:1.7, y1:2, line:{color:'#2980b9', width:3}, fillcolor:'rgba(41,128,185,0.15)'},
+      {type:'circle', xref:'x', yref:'y', x0:1.3, y0:1, x1:2.15, y1:2, line:{color:'#27ae60', width:3}, fillcolor:'rgba(39,174,96,0.15)'}
+    ],
+    annotations:[
+      {x:1.1, y:2.05, text:`Only Apple: ${onlyA}`, font:{size:14, color:'#2980b9'}, showarrow:false, bgcolor:'#85c1e9', borderpad:4},
+      {x:1.95, y:2.05, text:`Only Likes Chocolate: ${onlyB}`, font:{size:14, color:'#27ae60'}, showarrow:false, bgcolor:'#abebc6', borderpad:4},
+      {x:1.5, y:1.5, text:`Both: ${overlap}`, font:{size:14, color:'#b7950b'}, showarrow:false, bgcolor:'#f7ca18', borderpad:5},
+      {x:0.45, y:0.7, text:`Neither: ${neither}`, font:{size:14, color:'#616161'}, showarrow:false, bgcolor:'#d5dbdb', borderpad:4}
+    ],
+    title: "Venn Diagram: Favorite Apple & Likes Chocolate",
+    xaxis:{range:[0.3,2.4], showgrid:false, zeroline:false, showticklabels:false},
+    yaxis:{range:[0,2.5], showgrid:false, zeroline:false, showticklabels:false},
+    margin: {t:80,l:0,r:0,b:0}
+  }, {displayModeBar: false});
+}
+// Initialize list on page load
+rebuildMysteryList();
+
+/* --- ACTIVITY 3: Venn Diagram Treasure Hunt --- */
+
+const treasuresData = [
+  {name: "Pizza Gem", region: "Aonly", emoji:"🍕"},
+  {name: "Pasta Pearl", region: "Bonly", emoji:"🍝"},
+  {name: "Combo Crown", region: "Both", emoji:"👑"},
+  {name: "No Food Nugget", region: "Neither", emoji:"💎"},
 ];
-let vennQIdx = 0;
-function drawVennQ(values, sets) {
-  const {Aonly, Bonly, Both, Neither} = values;
-  Plotly.newPlot('venn-q-plot', [], {
-      title:`${sets.A} & ${sets.B}`,
-      xaxis:{range:[0,2.4], showgrid:false, zeroline:false, showticklabels:false},
-      yaxis:{range:[0,2.5], showgrid:false, zeroline:false, showticklabels:false},
-      shapes:[
-        {type:'circle', xref:'x', yref:'y', x0:0.8, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3}, fillcolor:'rgba(33,150,243,0.12)'},
-        {type:'circle', xref:'x', yref:'y', x0:1.25, y0:1, x1:2.15, y1:2, line:{color:'#52be80', width:3}, fillcolor:'rgba(46,204,113,0.09)'}
-      ],
-      margin:{t:70,l:0,r:0,b:0},
-      annotations:[
-        {x:1, y:2.05, text:`A only: ${Aonly}`, font:{size:15, color:'#2980b9'}, showarrow:false, bgcolor:'#85c1e9', borderpad:4},
-        {x:2, y:2.05, text:`B only: ${Bonly}`, font:{size:15, color:'#27ae60'}, showarrow:false, bgcolor:'#abebc6', borderpad:4},
-        {x:1.45, y:1.5, text:`Both: ${Both}`, font:{size:15, color:'#b7950b'}, showarrow:false, bgcolor:'#f7ca18', borderpad:5},
-        {x:0.45, y:0.65, text:`Neither: ${Neither}`, font:{size:14, color:'#616161'}, showarrow:false, bgcolor:'#d5dbdb', borderpad:4}
-      ]
-    }, {displayModeBar:false}
-  );
-  const total = Aonly + Bonly + Neither;
-  const setA = Aonly + Both;
-  const setB = Bonly + Both;
-  document.getElementById('venn-summary-top').innerHTML =
-    `<b>Total (excluding overlap):</b> ${total} | <b>A only:</b> ${Aonly} | <b>B only:</b> ${Bonly} | <b>Both:</b> ${Both} | <b>Neither:</b> ${Neither} 
-    | <b>A total:</b> ${setA} | <b>B total:</b> ${setB}`;
-}
-function newVennQ(){
-  vennQIdx = Math.floor(Math.random()*vennQs.length);
-  const q = vennQs[vennQIdx];
-  drawVennQ(q.values, q.sets);
-  document.getElementById('vennAOnly').value = "";
-  document.getElementById('vennBOnly').value = "";
-  document.getElementById('vennBoth').value = "";
-  document.getElementById('vennNeither').value = "";
-  document.getElementById('venn-q-feedback').textContent = "";
-}
-document.getElementById('new-venn-q').onclick = newVennQ;
-document.getElementById('reset-venn-q').onclick = function(){
-  const q = vennQs[vennQIdx];
-  drawVennQ(q.values, q.sets);
-  document.getElementById('vennAOnly').value = "";
-  document.getElementById('vennBOnly').value = "";
-  document.getElementById('vennBoth').value = "";
-  document.getElementById('vennNeither').value = "";
-  document.getElementById('venn-q-feedback').textContent = "";
+
+const vennDiagramDiv = document.getElementById('venn-diagram');
+const dropzonesBoxes = {
+  "Aonly": document.getElementById('drop-Aonly'),
+  "Bonly": document.getElementById('drop-Bonly'),
+  "Both": document.getElementById('drop-Both'),
+  "Neither": document.getElementById('drop-Neither')
 };
-document.getElementById('venn-answer-form').onsubmit = function(e){
-  e.preventDefault();
-  const q = vennQs[vennQIdx];
-  let aonly = Number(document.getElementById('vennAOnly').value);
-  let bonly = Number(document.getElementById('vennBOnly').value);
-  let both = Number(document.getElementById('vennBoth').value);
-  let neither = Number(document.getElementById('vennNeither').value);
-  if(aonly === q.values.Aonly && bonly === q.values.Bonly && both === q.values.Both && neither === q.values.Neither){
-    document.getElementById('venn-q-feedback').innerHTML = "<span class='correct'>🎉 Correct!</span>";
+
+let draggedTreasure = null;
+
+function createTreasureElements(){
+  // Remove existing treasures except circles
+  Array.from(vennDiagramDiv.querySelectorAll('.venn-region')).forEach(el => el.remove());
+  treasuresData.forEach((treasure, i) => {
+    let div = document.createElement('div');
+    div.className = 'venn-region';
+    div.textContent = treasure.emoji + " " + treasure.name;
+    div.draggable = true;
+    div.id = 'treasure-'+i;
+    div.dataset.region = treasure.region;
+    div.tabIndex = 0;
+    div.setAttribute('aria-grabbed', 'false');
+    div.addEventListener('dragstart', vennDragStart);
+    div.addEventListener('dragend', vennDragEnd);
+    // Keyboard accessible drag start:
+    div.addEventListener('keydown', vennKeyboardDragStart);
+    // Put in default position around center overlapping region
+    if(treasure.region === 'Both'){
+      div.style.top = '95px';
+      div.style.left = '165px';
+    } else if(treasure.region === 'Aonly'){
+      div.style.top = '65px';
+      div.style.left = '110px';
+    } else if(treasure.region === 'Bonly'){
+      div.style.top = '65px';
+      div.style.left = '230px';
+    } else if(treasure.region === 'Neither'){
+      div.style.top = '190px';
+      div.style.left = '170px';
+    }
+    vennDiagramDiv.appendChild(div);
+  });
+}
+createTreasureElements();
+
+function vennDragStart(e){
+  draggedTreasure = e.target;
+  e.dataTransfer.setData("text/plain", draggedTreasure.id);
+  e.dataTransfer.effectAllowed = "move";
+  draggedTreasure.classList.add('dragging');
+  draggedTreasure.setAttribute('aria-grabbed', 'true');
+}
+function vennDragEnd(e){
+  if(draggedTreasure){
+    draggedTreasure.classList.remove('dragging');
+    draggedTreasure.setAttribute('aria-grabbed', 'false');
+  }
+  draggedTreasure = null;
+}
+// Keyboard drag start/end for accessibility on treasures
+let vennKeyboardDragItem = null;
+function vennKeyboardDragStart(e){
+  if(e.key === ' ' || e.key === 'Enter'){
+    e.preventDefault();
+    if(vennKeyboardDragItem === e.target){
+      // Drop into focused dropzone if exists
+      const dropzone = document.activeElement.closest('.dropzone-box');
+      if(dropzone && vennKeyboardDragItem){
+        dropzone.appendChild(vennKeyboardDragItem);
+        vennKeyboardDragItem.classList.remove('dragging');
+        vennKeyboardDragItem.setAttribute('aria-grabbed', 'false');
+        vennKeyboardDragItem = null;
+        document.getElementById('venn-feedback').textContent = "";
+      } else {
+        // else cancel drag
+        vennKeyboardDragItem.classList.remove('dragging');
+        vennKeyboardDragItem.setAttribute('aria-grabbed', 'false');
+        vennKeyboardDragItem = null;
+      }
+    } else {
+      if(vennKeyboardDragItem){
+        vennKeyboardDragItem.classList.remove('dragging');
+        vennKeyboardDragItem.setAttribute('aria-grabbed', 'false');
+      }
+      vennKeyboardDragItem = e.target;
+      vennKeyboardDragItem.classList.add('dragging');
+      vennKeyboardDragItem.setAttribute('aria-grabbed', 'true');
+    }
+  }
+  if(e.key === 'Escape' && vennKeyboardDragItem){
+    vennKeyboardDragItem.classList.remove('dragging');
+    vennKeyboardDragItem.setAttribute('aria-grabbed', 'false');
+    vennKeyboardDragItem = null;
+  }
+}
+
+// Drop zones - drag and keyboard support
+Object.values(dropzonesBoxes).forEach(dz => {
+  dz.addEventListener('dragover', e => {
+    e.preventDefault();
+    dz.classList.add('highlight');
+    dz.setAttribute('aria-dropeffect', 'move');
+  });
+  dz.addEventListener('dragleave', e => {
+    dz.classList.remove('highlight');
+    dz.setAttribute('aria-dropeffect', 'none');
+  });
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('highlight');
+    const id = e.dataTransfer.getData('text/plain');
+    const treasure = document.getElementById(id);
+    if(treasure){
+      dz.appendChild(treasure);
+      dz.setAttribute('aria-dropeffect', 'none');
+      document.getElementById('venn-feedback').textContent = "";
+    }
+  });
+});
+
+/* Checking the treasure placements */
+document.getElementById('check-venn-hunt').onclick = function(){
+  let correct = true;
+  for(let i=0; i < treasuresData.length; i++){
+    const treasure = document.getElementById('treasure-'+i);
+    if(!treasure.parentNode.classList.contains('dropzone-box') ||
+       treasure.parentNode.dataset.region !== treasuresData[i].region) {
+      correct = false;
+      break;
+    }
+  }
+  const feedback = document.getElementById('venn-feedback');
+  if(correct) {
+    feedback.textContent = "🎉 Perfect! All treasures are in the right region.";
+    feedback.className = "feedback correct";
   } else {
-    document.getElementById('venn-q-feedback').innerHTML = "<span class='incorrect'>❌ Not quite. Try again!</span>";
+    feedback.textContent = "❌ Some treasures are in the wrong region. Try again!";
+    feedback.className = "feedback incorrect";
   }
 };
-newEventExample();
-newTableExample();
-newVennQ();
+/* Reset treasure positions */
+document.getElementById('reset-venn-hunt').onclick = function(){
+  document.getElementById('venn-feedback').textContent = "";
+  // Remove treasures from dropzones and put back into venn diagram at default positions
+  treasuresData.forEach((treasure, i) => {
+    const t = document.getElementById('treasure-'+i);
+    if(t && t.parentNode && t.parentNode.classList.contains('dropzone-box')){
+      vennDiagramDiv.appendChild(t);
+      t.style.top = '';
+      t.style.left = '';
+      // reset position to default (see createTreasureElements)
+      if(treasure.region === 'Both'){
+        t.style.top = '95px';
+        t.style.left = '165px';
+      } else if(treasure.region === 'Aonly'){
+        t.style.top = '65px';
+        t.style.left = '110px';
+      } else if(treasure.region === 'Bonly'){
+        t.style.top = '65px';
+        t.style.left = '230px';
+      } else if(treasure.region === 'Neither'){
+        t.style.top = '190px';
+        t.style.left = '170px';
+      }
+    }
+  });
+};
+/* End of script */
 </script>
+
 </body>
 </html>
