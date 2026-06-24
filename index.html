@@ -1,7 +1,8 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
@@ -22,8 +23,8 @@ button:hover { background: #21618c; }
 .table2 input[readonly] { background: #e1e8f0; }
 .venn-wrap { width: 420px; height: 300px; margin: 0 auto;}
 .hint-box {
-  background: #d9edf7; 
-  border-left: 5px solid #31708f; 
+  background: #d9edf7;
+  border-left: 5px solid #31708f;
   padding: 10px 15px;
   margin-top: 10px;
   font-size: 0.95rem;
@@ -85,14 +86,14 @@ button:hover { background: #21618c; }
         </tr>
         <tr>
           <th id="rowHead1"></th>
-          <td><input class="input-small" id="cell11" type="number" min="0"></td>
-          <td><input class="input-small" id="cell12" type="number" min="0"></td>
+          <td><input class="input-small" id="cell11" type="number" min="0" pattern="\d+" inputmode="numeric" step="1"></td>
+          <td><input class="input-small" id="cell12" type="number" min="0" pattern="\d+" inputmode="numeric" step="1"></td>
           <td><input class="input-small" id="rowTotal1" type="number" readonly></td>
         </tr>
         <tr>
           <th id="rowHead2"></th>
-          <td><input class="input-small" id="cell21" type="number" min="0"></td>
-          <td><input class="input-small" id="cell22" type="number" min="0"></td>
+          <td><input class="input-small" id="cell21" type="number" min="0" pattern="\d+" inputmode="numeric" step="1"></td>
+          <td><input class="input-small" id="cell22" type="number" min="0" pattern="\d+" inputmode="numeric" step="1"></td>
           <td><input class="input-small" id="rowTotal2" type="number" readonly></td>
         </tr>
         <tr>
@@ -126,7 +127,7 @@ button:hover { background: #21618c; }
     <div class="venn-wrap" id="venn-plot" role="img" aria-label="Venn diagram"></div>
     <form id="venn-form">
       <label class="label" for="venn-overlap">How many are in both sets (overlap)?</label>
-      <input type="number" id="venn-overlap" required min="0" aria-describedby="hint-venn" />
+      <input type="number" id="venn-overlap" required min="0" aria-describedby="hint-venn" step="1" pattern="\d+" inputmode="numeric" />
       <button type="submit">Submit Answer</button>
     </form>
     <div id="venn-feedback"></div>
@@ -174,8 +175,6 @@ document.getElementById('exclusive-form').onsubmit = function(e){
     }
   }
 }
-
-// Hint toggle for exclusive events
 document.getElementById('show-hint-exclusive').onclick = function(){
   const hint = document.getElementById('hint-exclusive');
   hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
@@ -202,20 +201,26 @@ const tableExamples = [
 
 let tableIdx = 0;
 
+function parseCellValue(id) {
+  // Use parseInt, trim and check for validity (non-negative integer)
+  const raw = document.getElementById(id).value;
+  if(raw === null || raw.trim() === "") return null; // empty
+  if(!/^\d+$/.test(raw.trim())) return NaN; // invalid
+  return parseInt(raw.trim(),10);
+}
+
 function updateTotals() {
-  const c11 = Number(document.getElementById('cell11').value) || 0;
-  const c12 = Number(document.getElementById('cell12').value) || 0;
-  const c21 = Number(document.getElementById('cell21').value) || 0;
-  const c22 = Number(document.getElementById('cell22').value) || 0;
-  
+  const c11 = parseCellValue('cell11') || 0;
+  const c12 = parseCellValue('cell12') || 0;
+  const c21 = parseCellValue('cell21') || 0;
+  const c22 = parseCellValue('cell22') || 0;
+
   const row1Total = c11 + c12;
   const row2Total = c21 + c22;
-  
   const col1Total = c11 + c21;
   const col2Total = c12 + c22;
-  
   const grandTotal = row1Total + row2Total;
-  
+
   document.getElementById('rowTotal1').value = row1Total;
   document.getElementById('rowTotal2').value = row2Total;
   document.getElementById('colTotal1').value = col1Total;
@@ -255,13 +260,27 @@ document.getElementById('reset-table').onclick = function(){
 };
 
 document.getElementById('table-check').onclick = function(){
-  updateTotals(); // Make sure totals are updated
-
+  // Validate all inputs first: must be non-empty, non-negative integers without decimals
+  const inputs = ['cell11','cell12','cell21','cell22'];
+  const feedback = document.getElementById('table-feedback');
+  for(const id of inputs){
+    const val = parseCellValue(id);
+    if(val === null) {
+      feedback.innerHTML = "<span class='incorrect'>❌ Please fill out all table cells.</span>";
+      return;
+    }
+    if(isNaN(val)){
+      feedback.innerHTML = "<span class='incorrect'>❌ Please enter valid non-negative integers (no decimals).</span>";
+      return;
+    }
+  }
+  updateTotals(); // Ensure totals updated after final input
+  
   const ex = tableExamples[tableIdx];
-  const c11 = Number(document.getElementById('cell11').value) || 0;
-  const c12 = Number(document.getElementById('cell12').value) || 0;
-  const c21 = Number(document.getElementById('cell21').value) || 0;
-  const c22 = Number(document.getElementById('cell22').value) || 0;
+  const c11 = parseCellValue('cell11');
+  const c12 = parseCellValue('cell12');
+  const c21 = parseCellValue('cell21');
+  const c22 = parseCellValue('cell22');
 
   let correct = 
     (c11 === ex.matrix[0][0]) &&
@@ -282,7 +301,6 @@ document.getElementById('table-check').onclick = function(){
     (Number(document.getElementById('colTotal2').value) === expectedCol2) &&
     (Number(document.getElementById('grandTotal').value) === expectedGrand);
 
-  const feedback = document.getElementById('table-feedback');
   if(correct){
     feedback.innerHTML = "<span class='correct'>🎉 Correct! All values including totals match.</span>";
   } else {
@@ -290,7 +308,6 @@ document.getElementById('table-check').onclick = function(){
   }
 };
 
-// Hint toggle for table
 document.getElementById('show-hint-table').onclick = function(){
   const hint = document.getElementById('hint-table');
   hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
@@ -350,7 +367,7 @@ document.getElementById('reset-venn').onclick = function(){
 
 document.getElementById('venn-form').onsubmit = function(e){
   e.preventDefault();
-  const guess = parseInt(document.getElementById('venn-overlap').value);
+  const guess = parseInt(document.getElementById('venn-overlap').value,10);
   if(guess === vennData.overlap){
     document.getElementById('venn-feedback').innerHTML = "<span class='correct'>🎉 Correct!</span>";
   } else {
@@ -358,7 +375,6 @@ document.getElementById('venn-form').onsubmit = function(e){
   }
 };
 
-// Hint toggle for venn
 document.getElementById('show-hint-venn').onclick = function(){
   const hint = document.getElementById('hint-venn');
   hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
