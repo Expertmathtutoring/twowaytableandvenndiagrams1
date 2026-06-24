@@ -182,6 +182,7 @@ document.getElementById('show-hint-exclusive').onclick = function(){
 }
 
 // --- TABLE ACTIVITY ---
+
 const tableExamples = [
   {
     desc:"Fill in the table for 'Favorite Fruit vs Likes Chocolate'.",
@@ -231,9 +232,11 @@ function newTableExample() {
   document.getElementById('rowHead2').textContent = ex.rowHeads[1];
   document.getElementById('colHead1').textContent = ex.colHeads[0];
   document.getElementById('colHead2').textContent = ex.colHeads[1];
+
   ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach(id => {
     document.getElementById(id).value = "";
   });
+
   document.getElementById('table-feedback').textContent = "";
   document.getElementById('hint-table').style.display = "none";
 }
@@ -258,28 +261,28 @@ document.getElementById('table-check').onclick = function(){
   const c12 = Number(document.getElementById('cell12').value) || 0;
   const c21 = Number(document.getElementById('cell21').value) || 0;
   const c22 = Number(document.getElementById('cell22').value) || 0;
-  
-  // Validate individual cells
+
+  // Validate cells are exactly as expected  
   let correct = 
     (c11 === ex.matrix[0][0]) &&
     (c12 === ex.matrix[0][1]) &&
     (c21 === ex.matrix[1][0]) &&
     (c22 === ex.matrix[1][1]);
-  
-  // Validate totals
+
+  // Validate totals match
   const expectedRow1 = ex.matrix[0][0] + ex.matrix[0][1];
   const expectedRow2 = ex.matrix[1][0] + ex.matrix[1][1];
   const expectedCol1 = ex.matrix[0][0] + ex.matrix[1][0];
   const expectedCol2 = ex.matrix[0][1] + ex.matrix[1][1];
   const expectedGrand = expectedRow1 + expectedRow2;
-  
+
   correct = correct &&
     (Number(document.getElementById('rowTotal1').value) === expectedRow1) &&
     (Number(document.getElementById('rowTotal2').value) === expectedRow2) &&
     (Number(document.getElementById('colTotal1').value) === expectedCol1) &&
     (Number(document.getElementById('colTotal2').value) === expectedCol2) &&
     (Number(document.getElementById('grandTotal').value) === expectedGrand);
-  
+
   const feedback = document.getElementById('table-feedback');
   if(correct){
     feedback.innerHTML = "<span class='correct'>🎉 Correct! All values including totals match.</span>";
@@ -296,28 +299,25 @@ document.getElementById('show-hint-table').onclick = function(){
 
 // --- VENN DIAGRAM ---
 function randomVennData(){
-  // Simple random values for sets
-  let total = Math.floor(Math.random()*18)+12; // 12 to 29
-  let A = Math.floor(Math.random()*total/2)+4; // 4 to half of total
+  let total = Math.floor(Math.random()*18)+12; 
+  let A = Math.floor(Math.random()*total/2)+4;
   let B = Math.floor(Math.random()*total/2)+4;
-  let overlap = Math.floor(Math.min(A,B)/2)+1; // at least 1 in the overlap, at most min(A,B)/2
+  let overlap = Math.floor(Math.min(A,B)/2)+1;
   return {total, A, B, overlap};
 }
 let vennData = randomVennData();
 
 function drawVenn(){
   const {A,B,overlap,total} = vennData;
-  // Plotly traces for Venn circles
   let traceA = {
-    x:[1], y:[1.5], text:`A<br>${A}`, mode:'text', name:'A', textfont:{size:20}, showlegend:false
+    x:[1], y:[1.5], text:`A<br>${A}`, mode:'text', textfont:{size:20}, showlegend:false
   };
   let traceB = {
-    x:[2], y:[1.5], text:`B<br>${B}`, mode:'text', name:'B', textfont:{size:20}, showlegend:false
+    x:[2], y:[1.5], text:`B<br>${B}`, mode:'text', textfont:{size:20}, showlegend:false
   };
   let traceOverlap = {
-    x:[1.5], y:[1.5], text:`Overlap<br>${overlap}`,mode:'text', name:'Overlap', textfont:{size:18}, showlegend:false
+    x:[1.5], y:[1.5], text:`Overlap<br>${overlap}`,mode:'text', textfont:{size:18}, showlegend:false
   };
-  // Draw circles as shapes
   let shapeA = {type:'circle', xref:'x', yref:'y', x0:0.7, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3}, fillcolor:'rgba(33,150,243,0.1)'};
   let shapeB = {type:'circle', xref:'x', yref:'y', x0:1.3, y0:1, x1:2.3, y1:2, line:{color:'#52be80', width:3}, fillcolor:'rgba(46,204,113,0.1)'};
   Plotly.newPlot('venn-plot', [traceA, traceB, traceOverlap], {
@@ -357,14 +357,12 @@ document.getElementById('venn-form').onsubmit=function(e){
     document.getElementById('venn-feedback').innerHTML = "<span class='incorrect'>❌ Not right. Try again!</span>";
   }
 };
-
 // Hint toggle for venn
 document.getElementById('show-hint-venn').onclick = function(){
   const hint = document.getElementById('hint-venn');
   hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
 };
 
-// Initialize all sections
 newEventExample();
 newTableExample();
 newVenn();
