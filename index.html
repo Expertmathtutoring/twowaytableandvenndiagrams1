@@ -20,6 +20,16 @@ button:hover { background: #21618c; }
 .table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; }
 .table2 th { background: #d4e6f1; }
 .venn-wrap { width: 420px; height: 300px; margin: 0 auto;}
+.hint-box {
+  background: #d9edf7; 
+  border-left: 5px solid #31708f; 
+  padding: 10px 15px;
+  margin-top: 10px;
+  font-size: 0.95rem;
+  display: none;
+  border-radius: 4px;
+  color: #31708f;
+}
 @media (max-width: 600px){
   .venn-wrap { width: 99vw; height: 220px;}
   .table2 { width: 96vw;}
@@ -35,6 +45,10 @@ button:hover { background: #21618c; }
   <div class="flex">
     <div>
       <div id="event-desc"></div>
+      <button id="show-hint-exclusive" type="button">Show Hint</button>
+      <div id="hint-exclusive" class="hint-box">
+        <strong>Hint:</strong> Mutually exclusive events cannot happen at the same time. Ask yourself: can both events occur simultaneously? If yes, then they are <em>not</em> mutually exclusive.
+      </div>
       <button id="new-event">New Example</button>
       <button id="reset-event">Reset</button>
       <form id="exclusive-form" style="margin-top:12px;">
@@ -54,10 +68,14 @@ button:hover { background: #21618c; }
   <h2>2. Two-way Table Activity</h2>
   <div>
     <div id="table-desc"></div>
+    <button id="show-hint-table" type="button">Show Hint</button>
+    <div id="hint-table" class="hint-box">
+      <strong>Hint:</strong> Read carefully the categories for rows and columns. Fill in the table by entering the number of individuals in each group. Double check if the sum of rows and columns make logical sense.
+    </div>
     <button id="new-table">New Table</button>
     <button id="reset-table">Reset</button>
     <div class="table-wrap">
-      <table class="table2" id="table2">
+      <table class="table2" id="table2" aria-label="Two-way table">
         <tr>
           <th></th>
           <th id="colHead1"></th>
@@ -65,13 +83,13 @@ button:hover { background: #21618c; }
         </tr>
         <tr>
           <th id="rowHead1"></th>
-          <td><input class="input-small" id="cell11" type="number"></td>
-          <td><input class="input-small" id="cell12" type="number"></td>
+          <td><input class="input-small" id="cell11" type="number" min="0"></td>
+          <td><input class="input-small" id="cell12" type="number" min="0"></td>
         </tr>
         <tr>
           <th id="rowHead2"></th>
-          <td><input class="input-small" id="cell21" type="number"></td>
-          <td><input class="input-small" id="cell22" type="number"></td>
+          <td><input class="input-small" id="cell21" type="number" min="0"></td>
+          <td><input class="input-small" id="cell22" type="number" min="0"></td>
         </tr>
       </table>
     </div>
@@ -84,12 +102,21 @@ button:hover { background: #21618c; }
   <h2>3. Venn Diagram Interactive</h2>
   <div>
     <div id="venn-desc"></div>
+    <button id="show-hint-venn" type="button">Show Steps</button>
+    <div id="hint-venn" class="hint-box">
+      <strong>Steps:</strong><br>
+      1. Note the total number of people.<br>
+      2. Look at how many are in Set A and Set B.<br>
+      3. The overlap number is the count included in both sets simultaneously.<br>
+      4. Use the formula: Overlap ≤ min(Set A, Set B).<br>
+      5. Check your answer by comparing with the total and individual sets.
+    </div>
     <button id="new-venn">New Venn</button>
     <button id="reset-venn">Reset</button>
-    <div class="venn-wrap" id="venn-plot"></div>
+    <div class="venn-wrap" id="venn-plot" role="img" aria-label="Venn diagram"></div>
     <form id="venn-form">
-      <label class="label">How many are in both sets (overlap)?</label>
-      <input type="number" id="venn-overlap" required>
+      <label class="label" for="venn-overlap">How many are in both sets (overlap)?</label>
+      <input type="number" id="venn-overlap" required min="0" aria-describedby="hint-venn" />
       <button type="submit">Submit Answer</button>
     </form>
     <div id="venn-feedback"></div>
@@ -115,11 +142,13 @@ function newEventExample(){
   document.getElementById('exclusive-form').reset();
   document.getElementById('exclusive-feedback').textContent = "";
   exclusiveCurrent = example.mutual;
+  document.getElementById('hint-exclusive').style.display = "none";
 }
 document.getElementById('new-event').onclick = newEventExample;
 document.getElementById('reset-event').onclick = function(){
   document.getElementById('exclusive-form').reset();
   document.getElementById('exclusive-feedback').textContent = "";
+  document.getElementById('hint-exclusive').style.display = "none";
 };
 let exclusiveCurrent=true;
 document.getElementById('exclusive-form').onsubmit = function(e){
@@ -135,7 +164,12 @@ document.getElementById('exclusive-form').onsubmit = function(e){
     }
   }
 }
-newEventExample();
+
+// Hint toggle for exclusive events
+document.getElementById('show-hint-exclusive').onclick = function(){
+  const hint = document.getElementById('hint-exclusive');
+  hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+}
 
 // --- TABLE ACTIVITY ---
 const tableExamples = [
@@ -167,11 +201,13 @@ function newTableExample() {
   document.getElementById('colHead2').textContent = ex.colHeads[1];
   ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
   document.getElementById('table-feedback').textContent = "";
+  document.getElementById('hint-table').style.display = "none";
 }
 document.getElementById('new-table').onclick=newTableExample;
 document.getElementById('reset-table').onclick=function(){
   ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
   document.getElementById('table-feedback').textContent = "";
+  document.getElementById('hint-table').style.display = "none";
 };
 document.getElementById('table-check').onclick=function(){
   const ex = tableExamples[tableIdx];
@@ -186,8 +222,12 @@ document.getElementById('table-check').onclick=function(){
   }else{
     feedback.innerHTML = "<span class='incorrect'>❌ Some values are not correct. Try again!</span>";
   }
-};
-newTableExample();
+}
+// Hint toggle for table
+document.getElementById('show-hint-table').onclick = function(){
+  const hint = document.getElementById('hint-table');
+  hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+}
 
 // --- VENN DIAGRAM ---
 function randomVennData(){
@@ -223,6 +263,7 @@ function drawVenn(){
     margin:{t:60,l:0,r:0,b:0}
   });
 }
+
 function newVenn(){
   vennData = randomVennData();
   drawVenn();
@@ -233,11 +274,14 @@ function newVenn(){
     Some are in both sets.</b>`;
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
+  document.getElementById('hint-venn').style.display = "none";
 }
+
 document.getElementById('new-venn').onclick=newVenn;
 document.getElementById('reset-venn').onclick=function(){
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
+  document.getElementById('hint-venn').style.display = "none";
 };
 document.getElementById('venn-form').onsubmit=function(e){
   e.preventDefault();
@@ -248,6 +292,14 @@ document.getElementById('venn-form').onsubmit=function(e){
     document.getElementById('venn-feedback').innerHTML = "<span class='incorrect'>❌ Not right. Try again!</span>";
   }
 };
+// Hint toggle for venn
+document.getElementById('show-hint-venn').onclick = function(){
+  const hint = document.getElementById('hint-venn');
+  hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+};
+
+newEventExample();
+newTableExample();
 newVenn();
 </script>
 </body>
