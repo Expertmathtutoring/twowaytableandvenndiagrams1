@@ -6,27 +6,27 @@
 <title>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
-body { font-family: Arial, sans-serif; max-width: 840px; margin: 20px auto; background: #eef6fa; }
-h1, h2 { color: #2980b9; text-align: center; }
-.section { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #b1c7db4d; margin-bottom: 35px; padding: 20px; }
-.flex { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
-.label { font-weight: bold; margin-right: 8px; }
-button { background: #2980b9; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; font-size: 1rem; cursor: pointer; margin-top: 12px; }
-button:hover { background: #21618c; }
-.input-small { width: 54px; }
-.correct { color: green; font-weight: bold; }
-.incorrect { color: red; font-weight: bold; }
-.table-wrap { overflow-x: auto; margin-top: 16px; }
-.table2 { border-collapse: collapse; width: 380px; background: #f9f9fa; }
-.table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; vertical-align: middle; font-weight: normal; }
-.table2 th { background: #d4e6f1; font-weight: bold; }
-.table2 td.total-cell, .table2 th.total-cell { background: #f7ca18; color: #34495e; font-weight: bold; }
-.venn-wrap { width: 420px; height: 300px; margin: 0 auto;}
-@media (max-width: 600px){
-  .venn-wrap { width: 99vw; height: 220px;}
-  .table2 { width: 96vw;}
-  .flex { flex-direction: column; }
-}
+  body { font-family: Arial, sans-serif; max-width: 840px; margin: 20px auto; background: #eef6fa; }
+  h1, h2 { color: #2980b9; text-align: center; }
+  .section { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #b1c7db4d; margin-bottom: 35px; padding: 20px; }
+  .flex { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+  .label { font-weight: bold; margin-right: 8px; }
+  button { background: #2980b9; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; font-size: 1rem; cursor: pointer; margin-top: 12px; }
+  button:hover { background: #21618c; }
+  .input-small { width: 54px; }
+  .correct { color: green; font-weight: bold; }
+  .incorrect { color: red; font-weight: bold; }
+  .table-wrap { overflow-x: auto; margin-top: 16px; }
+  .table2 { border-collapse: collapse; width: 380px; background: #f9f9fa; }
+  .table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; vertical-align: middle; font-weight: normal; }
+  .table2 th { background: #d4e6f1; font-weight: bold; }
+  .table2 td.total-cell, .table2 th.total-cell { background: #f7ca18; color: #34495e; font-weight: bold; }
+  .venn-wrap { width: 420px; height: 300px; margin: 0 auto;}
+  @media (max-width: 600px){
+    .venn-wrap { width: 99vw; height: 220px;}
+    .table2 { width: 96vw;}
+    .flex { flex-direction: column; }
+  }
 </style>
 </head>
 <body>
@@ -59,57 +59,57 @@ button:hover { background: #21618c; }
     <button id="new-table">New Table</button>
     <button id="reset-table">Reset</button>
     <div class="table-wrap">
-      <table class="table2" id="table2">
+      <table class="table2" id="table2" aria-label="Two-way frequency table with totals">
         <thead>
           <tr>
-            <th></th>
-            <th id="colHead1"></th>
-            <th id="colHead2"></th>
-            <th class="total-cell">Total</th>
+            <th scope="col"></th>
+            <th scope="col" id="colHead1"></th>
+            <th scope="col" id="colHead2"></th>
+            <th scope="col" class="total-cell">Total</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <th id="rowHead1"></th>
-            <td><input class="input-small cell-input" id="cell11" type="number" min="0"></td>
-            <td><input class="input-small cell-input" id="cell12" type="number" min="0"></td>
-            <td class="total-cell" id="rowTotal1">0</td>
+            <th scope="row" id="rowHead1"></th>
+            <td><input class="input-small cell-input" id="cell11" type="number" min="0" aria-label="Cell 1,1"></td>
+            <td><input class="input-small cell-input" id="cell12" type="number" min="0" aria-label="Cell 1,2"></td>
+            <td class="total-cell" id="rowTotal1" aria-live="polite" aria-atomic="true">0</td>
           </tr>
           <tr>
-            <th id="rowHead2"></th>
-            <td><input class="input-small cell-input" id="cell21" type="number" min="0"></td>
-            <td><input class="input-small cell-input" id="cell22" type="number" min="0"></td>
-            <td class="total-cell" id="rowTotal2">0</td>
+            <th scope="row" id="rowHead2"></th>
+            <td><input class="input-small cell-input" id="cell21" type="number" min="0" aria-label="Cell 2,1"></td>
+            <td><input class="input-small cell-input" id="cell22" type="number" min="0" aria-label="Cell 2,2"></td>
+            <td class="total-cell" id="rowTotal2" aria-live="polite" aria-atomic="true">0</td>
           </tr>
         </tbody>
         <tfoot>
           <tr>
             <th class="total-cell">Total</th>
-            <td class="total-cell" id="colTotal1">0</td>
-            <td class="total-cell" id="colTotal2">0</td>
-            <td class="total-cell" id="grandTotal">0</td>
+            <td class="total-cell" id="colTotal1" aria-live="polite" aria-atomic="true">0</td>
+            <td class="total-cell" id="colTotal2" aria-live="polite" aria-atomic="true">0</td>
+            <td class="total-cell" id="grandTotal" aria-live="polite" aria-atomic="true">0</td>
           </tr>
         </tfoot>
       </table>
     </div>
     <button id="table-check">Submit Table</button>
-    <div id="table-feedback"></div>
+    <div id="table-feedback" role="alert" aria-live="assertive"></div>
   </div>
 </div>
 
 <div class="section" id="venn-section">
   <h2>3. Venn Diagram Interactive</h2>
   <div>
-    <div id="venn-desc"></div>
+    <div id="venn-desc" aria-live="polite" aria-atomic="true"></div>
     <button id="new-venn">New Venn</button>
     <button id="reset-venn">Reset</button>
-    <div class="venn-wrap" id="venn-plot"></div>
-    <form id="venn-form">
-      <label class="label">How many are in both sets (overlap)?</label>
-      <input type="number" id="venn-overlap" required min="0" step="1">
+    <div class="venn-wrap" id="venn-plot" aria-label="Venn diagram plot"></div>
+    <form id="venn-form" aria-describedby="venn-desc" style="margin-top:10px;">
+      <label class="label" for="venn-overlap">How many are in both sets (overlap)?</label>
+      <input type="number" id="venn-overlap" required min="0" step="1" aria-required="true">
       <button type="submit">Submit Answer</button>
     </form>
-    <div id="venn-feedback"></div>
+    <div id="venn-feedback" role="alert" aria-live="assertive" style="margin-top:8px;"></div>
   </div>
 </div>
 
@@ -230,10 +230,11 @@ function updateTotals(){
 document.getElementById('table-check').onclick=function(){
   const ex = tableExamples[tableIdx];
   let correct = true;
-  correct &= (parseInt(document.getElementById('cell11').value) === ex.matrix[0][0]);
-  correct &= (parseInt(document.getElementById('cell12').value) === ex.matrix[0][1]);
-  correct &= (parseInt(document.getElementById('cell21').value) === ex.matrix[1][0]);
-  correct &= (parseInt(document.getElementById('cell22').value) === ex.matrix[1][1]);
+  correct = correct && (parseInt(document.getElementById('cell11').value) === ex.matrix[0][0]);
+  correct = correct && (parseInt(document.getElementById('cell12').value) === ex.matrix[0][1]);
+  correct = correct && (parseInt(document.getElementById('cell21').value) === ex.matrix[1][0]);
+  correct = correct && (parseInt(document.getElementById('cell22').value) === ex.matrix[1][1]);
+
   const feedback = document.getElementById('table-feedback');
   if(correct){
     feedback.innerHTML = "<span class='correct'>🎉 Correct!</span>";
@@ -249,14 +250,10 @@ function randomVennData(){
   let A = Math.floor(Math.random()*total/2)+4; 
   let B = Math.floor(Math.random()*total/2)+4;
   let overlap = Math.floor(Math.min(A,B)/2)+1;
-  // To ensure consistency:
-  // A only = A - overlap
-  // B only = B - overlap
-  // Neither = total - (A only + B only + overlap)
   return {total, A, B, overlap, 
           Aonly: A - overlap,
           Bonly: B - overlap,
-          neither: 0 // to compute below
+          neither: 0
          };
 }
 
@@ -293,8 +290,8 @@ function newVenn(){
   drawVenn();
   document.getElementById('venn-desc').innerHTML =
     `<b>There are ${vennData.total} people in total.<br>
-    Set A has ${vennData.Aonly+vennData.overlap} people.<br>
-    Set B has ${vennData.Bonly+vennData.overlap} people.<br>
+    Set A has ${vennData.Aonly + vennData.overlap} people.<br>
+    Set B has ${vennData.Bonly + vennData.overlap} people.<br>
     Some are in both sets.</b>`;
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
