@@ -182,7 +182,6 @@ document.getElementById('show-hint-exclusive').onclick = function(){
 }
 
 // --- TABLE ACTIVITY ---
-
 const tableExamples = [
   {
     desc:"Fill in the table for 'Favorite Fruit vs Likes Chocolate'.",
@@ -232,11 +231,10 @@ function newTableExample() {
   document.getElementById('rowHead2').textContent = ex.rowHeads[1];
   document.getElementById('colHead1').textContent = ex.colHeads[0];
   document.getElementById('colHead2').textContent = ex.colHeads[1];
-
   ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach(id => {
     document.getElementById(id).value = "";
   });
-
+  updateTotals();
   document.getElementById('table-feedback').textContent = "";
   document.getElementById('hint-table').style.display = "none";
 }
@@ -251,25 +249,26 @@ document.getElementById('reset-table').onclick = function(){
   ['cell11','cell12','cell21','cell22','rowTotal1','rowTotal2','colTotal1','colTotal2','grandTotal'].forEach(id => {
     document.getElementById(id).value = "";
   });
+  updateTotals();
   document.getElementById('table-feedback').textContent = "";
   document.getElementById('hint-table').style.display = "none";
 };
 
 document.getElementById('table-check').onclick = function(){
+  updateTotals(); // Make sure totals are updated
+
   const ex = tableExamples[tableIdx];
   const c11 = Number(document.getElementById('cell11').value) || 0;
   const c12 = Number(document.getElementById('cell12').value) || 0;
   const c21 = Number(document.getElementById('cell21').value) || 0;
   const c22 = Number(document.getElementById('cell22').value) || 0;
 
-  // Validate cells are exactly as expected  
   let correct = 
     (c11 === ex.matrix[0][0]) &&
     (c12 === ex.matrix[0][1]) &&
     (c21 === ex.matrix[1][0]) &&
     (c22 === ex.matrix[1][1]);
 
-  // Validate totals match
   const expectedRow1 = ex.matrix[0][0] + ex.matrix[0][1];
   const expectedRow2 = ex.matrix[1][0] + ex.matrix[1][1];
   const expectedCol1 = ex.matrix[0][0] + ex.matrix[1][0];
@@ -342,13 +341,14 @@ function newVenn(){
   document.getElementById('hint-venn').style.display = "none";
 }
 
-document.getElementById('new-venn').onclick=newVenn;
-document.getElementById('reset-venn').onclick=function(){
+document.getElementById('new-venn').onclick = newVenn;
+document.getElementById('reset-venn').onclick = function(){
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
   document.getElementById('hint-venn').style.display = "none";
 };
-document.getElementById('venn-form').onsubmit=function(e){
+
+document.getElementById('venn-form').onsubmit = function(e){
   e.preventDefault();
   const guess = parseInt(document.getElementById('venn-overlap').value);
   if(guess === vennData.overlap){
@@ -357,12 +357,14 @@ document.getElementById('venn-form').onsubmit=function(e){
     document.getElementById('venn-feedback').innerHTML = "<span class='incorrect'>❌ Not right. Try again!</span>";
   }
 };
+
 // Hint toggle for venn
 document.getElementById('show-hint-venn').onclick = function(){
   const hint = document.getElementById('hint-venn');
   hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
 };
 
+// Initialize everything
 newEventExample();
 newTableExample();
 newVenn();
