@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</title>
+<title>Two-way Table & Venn Diagram Interactive Activities</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 840px; margin: 20px auto; background: #eef6fa; }
+  body { font-family: Arial, sans-serif; max-width: 860px; margin: 20px auto; background: #eef6fa; }
   h1, h2 { color: #2980b9; text-align: center; }
   .section { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #b1c7db4d; margin-bottom: 35px; padding: 20px; }
   .flex { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
@@ -21,44 +21,26 @@
   .table2 th, .table2 td { border: 1px solid #ddd; padding: 8px; text-align: center; vertical-align: middle; font-weight: normal; }
   .table2 th { background: #d4e6f1; font-weight: bold; }
   .table2 td.total-cell, .table2 th.total-cell { background: #f7ca18; color: #34495e; font-weight: bold; }
-  .venn-wrap { width: 420px; height: 300px; margin: 0 auto;}
-  @media (max-width: 600px){
-    .venn-wrap { width: 99vw; height: 220px;}
-    .table2 { width: 96vw;}
-    .flex { flex-direction: column; }
+  .venn-wrap { width: 440px; height: 300px; margin: 0 auto;}
+  .questions { margin-top: 20px; }
+  .question-item { margin-bottom: 12px; }
+  label.inline {display: inline-block; margin-right: 8px; font-weight: normal;}
+  @media (max-width: 680px){
+    .venn-wrap { width: 98vw; height: 220px; }
+    .table2 { width: 96vw; }
   }
 </style>
 </head>
 <body>
-<h1>Mutually Exclusive Events, Two-way Tables & Venn Diagrams</h1>
-
-<div class="section" id="exclusive-section">
-  <h2>1. Mutually vs Non-Mutually Exclusive Events</h2>
-  <div class="flex">
-    <div>
-      <div id="event-desc"></div>
-      <button id="new-event">New Example</button>
-      <button id="reset-event">Reset</button>
-      <form id="exclusive-form" style="margin-top:12px;">
-        <label class="label">Are these events mutually exclusive?</label>
-        <input type="radio" name="exclusive" value="mutual" id="mutual" required>
-        <label for="mutual">Yes</label>
-        <input type="radio" name="exclusive" value="non-mutual" id="non-mutual">
-        <label for="non-mutual">No</label>
-        <button type="submit">Submit</button>
-      </form>
-      <div id="exclusive-feedback" role="alert" aria-live="assertive"></div>
-    </div>
-  </div>
-</div>
+<h1>Two-way Table & Venn Diagram Interactive Activities</h1>
 
 <div class="section" id="table-section">
-  <h2>2. Two-way Table Activity</h2>
+  <h2>1. Two-way Table Activity</h2>
   <div>
-    <div id="table-desc"></div>
+    <div id="table-desc" style="font-weight:bold; margin-bottom:8px;"></div>
     <button id="new-table">New Table</button>
-    <button id="reset-table">Reset</button>
-    <div class="table-wrap">
+    <button id="reset-table">Reset Values</button>
+    <div class="table-wrap" style="margin-top:8px;">
       <table class="table2" id="table2" aria-label="Two-way frequency table with totals">
         <thead>
           <tr>
@@ -92,17 +74,18 @@
         </tfoot>
       </table>
     </div>
-    <button id="table-check">Submit Table</button>
-    <div id="table-feedback" role="alert" aria-live="assertive"></div>
+    <button id="table-submit" style="margin-top:12px;">Submit Table Answers</button>
+    <div id="table-feedback" role="alert" aria-live="assertive" style="margin-top:10px;"></div>
+    <div id="table-questions" class="questions" aria-live="polite" style="margin-top:20px;"></div>
   </div>
 </div>
 
 <div class="section" id="venn-section">
-  <h2>3. Venn Diagram Interactive</h2>
+  <h2>2. Venn Diagram Interactive</h2>
   <div>
-    <div id="venn-desc" aria-live="polite" aria-atomic="true"></div>
-    <button id="new-venn">New Venn</button>
-    <button id="reset-venn">Reset</button>
+    <div id="venn-desc" aria-live="polite" aria-atomic="true" style="font-weight:bold; margin-bottom:12px;"></div>
+    <button id="new-venn">New Venn Diagram</button>
+    <button id="reset-venn">Reset Venn Answer</button>
     <div class="venn-wrap" id="venn-plot" aria-label="Venn diagram plot"></div>
     <form id="venn-form" aria-describedby="venn-desc" style="margin-top:10px;">
       <label class="label" for="venn-overlap">How many are in both sets (overlap)?</label>
@@ -114,112 +97,63 @@
 </div>
 
 <script>
-// --- EVENTS ---
-const eventExamples = [
-  {desc:"Rolling a die: Event A is getting an even number, Event B is getting an odd number.", mutual:true},
-  {desc:"Drawing a card: Event A is getting a red card, Event B is getting a King.", mutual:false},
-  {desc:"Flipping a coin: Event A is getting heads, Event B is getting tails.", mutual:true},
-  {desc:"Picking a student: Event A is a girl, Event B is a student who wears glasses.", mutual:false},
-  {desc:"Choosing a day: Event A is a weekend, Event B is a day starting with 'S'.", mutual:false},
-  {desc:"Drawing a marble: Event A is blue, Event B is green.", mutual:true},
-  {desc:"Selecting a pet: Event A is a dog, Event B is a large animal.", mutual:false}
-];
-
-function newEventExample(){
-  const idx = Math.floor(Math.random()*eventExamples.length);
-  const example = eventExamples[idx];
-  document.getElementById('event-desc').innerHTML = "<b>"+example.desc+"</b>";
-  document.getElementById('exclusive-form').reset();
-  document.getElementById('exclusive-feedback').textContent = "";
-  exclusiveCurrent = example.mutual;
-}
-document.getElementById('new-event').onclick = newEventExample;
-document.getElementById('reset-event').onclick = function(){
-  document.getElementById('exclusive-form').reset();
-  document.getElementById('exclusive-feedback').textContent = "";
-};
-let exclusiveCurrent=true;
-document.getElementById('exclusive-form').onsubmit = function(e){
-  e.preventDefault();
-  const val = document.querySelector('input[name="exclusive"]:checked');
-  const feedback = document.getElementById('exclusive-feedback');
-  if(val){
-    if((val.value === "mutual" && exclusiveCurrent) ||
-       (val.value === "non-mutual" && !exclusiveCurrent)){
-      feedback.innerHTML = "<span class='correct'>🎉 Correct!</span>";
-    } else {
-      feedback.innerHTML = "<span class='incorrect'>❌ Not correct. Try again!</span>";
-    }
-  }
-}
-newEventExample();
-
-// --- TABLE ACTIVITY with totals row & column ---
-
+// --- Two-way Table Activity ---
 const tableExamples = [
   {
-    desc:"Fill in the table for 'Favorite Fruit vs Likes Chocolate'.",
-    rowHeads:["Apple","Banana"], colHeads:["Likes Chocolate","Doesn't Like Chocolate"],
-    matrix:[[8,3],[5,4]]
+    desc: "Favorite Fruit vs Likes Chocolate",
+    rowHeads: ["Apple", "Banana"],
+    colHeads: ["Likes Chocolate", "Doesn't Like Chocolate"],
+    matrix: [[8,3],[5,4]]
   },
   {
-    desc:"Fill in the table for 'Season vs Likes Swimming'.",
-    rowHeads:["Summer","Winter"],colHeads:["Likes Swimming","Doesn't Like Swimming"],
-    matrix:[[10,2],[3,8]]
+    desc: "Season vs Likes Swimming",
+    rowHeads: ["Summer", "Winter"],
+    colHeads: ["Likes Swimming", "Doesn't Like Swimming"],
+    matrix: [[10,2],[3,8]]
   },
   {
-    desc:"Fill in the table for 'Gender vs Likes Pizza'.",
-    rowHeads:["Boy","Girl"],colHeads:["Likes Pizza","Doesn't Like Pizza"],
-    matrix:[[9,4],[7,5]]
+    desc: "Gender vs Likes Pizza",
+    rowHeads: ["Boy", "Girl"],
+    colHeads: ["Likes Pizza", "Doesn't Like Pizza"],
+    matrix: [[9,4],[7,5]]
   }
 ];
 
 let tableIdx = 0;
+
 function newTableExample() {
   tableIdx = Math.floor(Math.random()*tableExamples.length);
   const ex = tableExamples[tableIdx];
-  document.getElementById('table-desc').innerHTML = "<b>"+ex.desc+"</b>";
+  document.getElementById('table-desc').textContent = ex.desc;
   document.getElementById('rowHead1').textContent = ex.rowHeads[0];
   document.getElementById('rowHead2').textContent = ex.rowHeads[1];
   document.getElementById('colHead1').textContent = ex.colHeads[0];
   document.getElementById('colHead2').textContent = ex.colHeads[1];
-  ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
-  // Reset totals:
-  document.getElementById('rowTotal1').textContent = "0";
-  document.getElementById('rowTotal2').textContent = "0";
-  document.getElementById('colTotal1').textContent = "0";
-  document.getElementById('colTotal2').textContent = "0";
-  document.getElementById('grandTotal').textContent = "0";
-  document.getElementById('table-feedback').textContent = "";
-}
-document.getElementById('new-table').onclick=newTableExample;
-document.getElementById('reset-table').onclick=function(){
-  ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
-  // Reset totals:
-  document.getElementById('rowTotal1').textContent = "0";
-  document.getElementById('rowTotal2').textContent = "0";
-  document.getElementById('colTotal1').textContent = "0";
-  document.getElementById('colTotal2').textContent = "0";
-  document.getElementById('grandTotal').textContent = "0";
-  document.getElementById('table-feedback').textContent = "";
-};
 
-const inputCells = ["cell11","cell12","cell21","cell22"];
-inputCells.forEach(id=>{
-  document.getElementById(id).addEventListener('input', updateTotals);
-});
-function getCellNumber(id){
-  const v = parseInt(document.getElementById(id).value);
-  return (isNaN(v) || v < 0) ? 0 : v;
+  // Clear inputs & totals
+  ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
+  updateTotals();
+  document.getElementById('table-feedback').textContent = "";
+  document.getElementById('table-questions').innerHTML = "";
 }
+
+function getCellNumber(id){
+  const val = parseInt(document.getElementById(id).value);
+  return (isNaN(val) || val < 0) ? 0 : val;
+}
+
 function updateTotals(){
-  const c11 = getCellNumber("cell11"), c12 = getCellNumber("cell12"),
-        c21 = getCellNumber("cell21"), c22 = getCellNumber("cell22");
-  const row1 = c11 + c12;
-  const row2 = c21 + c22;
-  const col1 = c11 + c21;
-  const col2 = c12 + c22;
-  const grand = row1 + row2;
+  const c11 = getCellNumber("cell11"),
+        c12 = getCellNumber("cell12"),
+        c21 = getCellNumber("cell21"),
+        c22 = getCellNumber("cell22");
+
+  const row1 = c11 + c12,
+        row2 = c21 + c22,
+        col1 = c11 + c21,
+        col2 = c12 + c22,
+        grand = row1 + row2;
+
   document.getElementById('rowTotal1').textContent = row1;
   document.getElementById('rowTotal2').textContent = row2;
   document.getElementById('colTotal1').textContent = col1;
@@ -227,47 +161,166 @@ function updateTotals(){
   document.getElementById('grandTotal').textContent = grand;
 }
 
-document.getElementById('table-check').onclick=function(){
-  const ex = tableExamples[tableIdx];
-  let correct = true;
-  correct = correct && (parseInt(document.getElementById('cell11').value) === ex.matrix[0][0]);
-  correct = correct && (parseInt(document.getElementById('cell12').value) === ex.matrix[0][1]);
-  correct = correct && (parseInt(document.getElementById('cell21').value) === ex.matrix[1][0]);
-  correct = correct && (parseInt(document.getElementById('cell22').value) === ex.matrix[1][1]);
+["cell11","cell12","cell21","cell22"].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateTotals);
+});
 
-  const feedback = document.getElementById('table-feedback');
-  if(correct){
-    feedback.innerHTML = "<span class='correct'>🎉 Correct!</span>";
-  }else{
-    feedback.innerHTML = "<span class='incorrect'>❌ Some values are not correct. Try again!</span>";
+
+function generateTableQuestions(){
+  const ex = tableExamples[tableIdx];
+  const c11 = getCellNumber("cell11"),
+        c12 = getCellNumber("cell12"),
+        c21 = getCellNumber("cell21"),
+        c22 = getCellNumber("cell22");
+
+  // Define questions related to the 2x2 table
+  // Example: How many have Apple and Likes Chocolate (A only)? 
+  // Here we consider each cell as meaning set intersections or combinations.
+  // We'll ask about:
+  // - Set row1 only: row1 total minus overlap with row2 (in this table, no overlap row wise, but we can ask direct cell counts)
+  // - Set col1 only, col2 only, both (cells), and neither (complement) check.
+
+  // For two-way table, questions relate to cells and totals.
+  // We'll ask 4 questions about the cells:
+  // * Number of people who are row1 & col1 (cell11)
+  // * Number of people who are row1 & col2 (cell12)
+  // * Number of people who are row2 & col1 (cell21)
+  // * Number of people who are row2 & col2 (cell22)
+  // Also the total and combinations (row totals, column totals) can be included optionally.
+
+  // Generate questions
+  // Use ids: q1..q5, inputs and answers for each
+
+  const questionsDiv = document.getElementById('table-questions');
+  questionsDiv.innerHTML = "";
+
+  const qdata = [
+    {
+      question: `How many have <b>${ex.rowHeads[0]}</b> AND <b>${ex.colHeads[0]}</b>?`,
+      correct: c11,
+      id: 'q1'
+    },
+    {
+      question: `How many have <b>${ex.rowHeads[0]}</b> AND <b>${ex.colHeads[1]}</b>?`,
+      correct: c12,
+      id: 'q2'
+    },
+    {
+      question: `How many have <b>${ex.rowHeads[1]}</b> AND <b>${ex.colHeads[0]}</b>?`,
+      correct: c21,
+      id: 'q3'
+    },
+    {
+      question: `How many have <b>${ex.rowHeads[1]}</b> AND <b>${ex.colHeads[1]}</b>?`,
+      correct: c22,
+      id: 'q4'
+    },
+    {
+      question: `What is the total number of people?`,
+      correct: c11 + c12 + c21 + c22,
+      id: 'q5'
+    }
+  ];
+
+  qdata.forEach(({question, correct, id}) => {
+    const qItem = document.createElement('div');
+    qItem.className = 'question-item';
+    qItem.innerHTML =
+    `
+      <label for="${id}_input" class="inline">${question}</label>
+      <input type="number" min="0" id="${id}_input" aria-label="${question}" />
+      <button aria-label="Check answer for question: ${question}" type="button" data-qid="${id}">Check</button>
+      <span id="${id}_feedback" role="alert" aria-live="assertive" style="margin-left:8px;"></span>
+    `;
+    questionsDiv.appendChild(qItem);
+  });
+
+  // Add listeners for check buttons:
+  questionsDiv.querySelectorAll('button').forEach(btn => {
+    btn.onclick = function(){
+      const qid = btn.getAttribute('data-qid');
+      const input = document.getElementById(qid + '_input');
+      const userAnswer = parseInt(input.value);
+      const feedbackEl = document.getElementById(qid + '_feedback');
+      const correctAnswer = qdata.find(q=>q.id === qid).correct;
+      if (isNaN(userAnswer)) {
+        feedbackEl.textContent = "Please enter a number.";
+        feedbackEl.className = "incorrect";
+        return;
+      }
+      if (userAnswer === correctAnswer) {
+        feedbackEl.textContent = "🎉 Correct!";
+        feedbackEl.className = "correct";
+      } else {
+        feedbackEl.textContent = `❌ Incorrect, try again.`;
+        feedbackEl.className = "incorrect";
+      }
+    };
+  });
+}
+
+// Table submit button: Generate questions for learner to answer
+document.getElementById('table-submit').onclick = function(){
+  // validate inputs first? (optional)
+  const c11Val = document.getElementById("cell11").value;
+  const c12Val = document.getElementById("cell12").value;
+  const c21Val = document.getElementById("cell21").value;
+  const c22Val = document.getElementById("cell22").value;
+  if ([c11Val, c12Val, c21Val, c22Val].some(v => v.trim() === "")) {
+    document.getElementById('table-feedback').textContent = "Please fill all cells before submitting.";
+    document.getElementById('table-feedback').className = "incorrect";
+    return;
   }
+  document.getElementById('table-feedback').textContent = "Questions generated based on your table. Please answer below.";
+  document.getElementById('table-feedback').className = "correct";
+  generateTableQuestions();
 };
+
+document.getElementById('new-table').onclick = newTableExample;
+document.getElementById('reset-table').onclick = () => {
+  ["cell11","cell12","cell21","cell22"].forEach(id => document.getElementById(id).value = "");
+  updateTotals();
+  document.getElementById('table-feedback').textContent = "";
+  document.getElementById('table-questions').innerHTML = "";
+};
+
+// initialize first example
+newTableExample();
+
 
 // --- VENN DIAGRAM ---
 
 function randomVennData(){
   let total = Math.floor(Math.random()*18)+12; 
-  let A = Math.floor(Math.random()*total/2)+4; 
-  let B = Math.floor(Math.random()*total/2)+4;
-  let overlap = Math.floor(Math.min(A,B)/2)+1;
+  let Aonly = Math.floor(Math.random()*(total/2-3)) + 2;
+  let Bonly = Math.floor(Math.random()*(total/2-3)) + 2;
+  let overlapMax = total - (Aonly + Bonly);
+  if (overlapMax < 2) overlapMax = 2;
+  let overlap = Math.floor(Math.random()*(overlapMax-1)) + 1;
+  // Complement = neither
+  const neither = total - (Aonly + Bonly + overlap);
   return {
-    total, 
-    Aonly: A - overlap,
-    Bonly: B - overlap,
+    total,
+    Aonly,
+    Bonly,
     overlap,
-    neither: total - (A - overlap + B - overlap + overlap)
+    neither
   };
 }
 
-let vennData = randomVennData();
+let vennData = null;
 
 function drawVenn(){
   const {Aonly, Bonly, overlap, neither} = vennData;
+  // Texts for sets
+  const setATotal = Aonly + overlap;
+  const setBTotal = Bonly + overlap;
+  // Plot circles and labels
   let traceA = {
-    x:[1], y:[1.5], text:`Set A: ${Aonly+overlap}`, mode:'text', showlegend:false, textfont:{size:20, color:'#2980b9'}
+    x:[1], y:[1.5], text:`Set A: ${setATotal}`, mode:'text', showlegend:false, textfont:{size:20, color:'#2980b9'}
   };
   let traceB = {
-    x:[2], y:[1.5], text:`Set B: ${Bonly+overlap}`, mode:'text', showlegend:false, textfont:{size:20, color:'#27ae60'}
+    x:[2], y:[1.5], text:`Set B: ${setBTotal}`, mode:'text', showlegend:false, textfont:{size:20, color:'#27ae60'}
   };
   let traceOverlap = {
     x:[1.5], y:[1.5], text:`Overlap: ${overlap}`, mode:'text', showlegend:false, textfont:{size:18, color:'#b7950b'}
@@ -275,41 +328,56 @@ function drawVenn(){
   let traceNeither = {
     x:[0.5], y:[0.5], text:`Neither: ${neither}`, mode:'text', showlegend:false, textfont:{size:16, color:'#7f8c8d'}
   };
+
+  // Circles for sets
   let shapeA = {type:'circle', xref:'x', yref:'y', x0:0.7, y0:1, x1:1.7, y1:2, line:{color:'#5dade2', width:3}, fillcolor:'rgba(33,150,243,0.1)'};
   let shapeB = {type:'circle', xref:'x', yref:'y', x0:1.3, y0:1, x1:2.3, y1:2, line:{color:'#52be80', width:3}, fillcolor:'rgba(46,204,113,0.1)'};
+
   Plotly.newPlot('venn-plot', [traceA, traceB, traceOverlap, traceNeither], {
     title:"Venn Diagram with Neither",
     xaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
     yaxis:{range:[0,3], showgrid:false, zeroline:false, showticklabels:false},
-    shapes:[shapeA, shapeB],
+    shapes: [shapeA, shapeB],
     margin:{t:60,l:0,r:0,b:0}
   });
 }
+
 function newVenn(){
   vennData = randomVennData();
   drawVenn();
   document.getElementById('venn-desc').innerHTML =
-    `<b>There are ${vennData.total} people in total.<br>
-    Set A has ${vennData.Aonly + vennData.overlap} people.<br>
-    Set B has ${vennData.Bonly + vennData.overlap} people.<br>
-    Some are in both sets.</b>`;
+    `<b>Total people: ${vennData.total}<br>
+    Set A includes ${vennData.Aonly} only + ${vennData.overlap} both = <u>${vennData.Aonly + vennData.overlap}</u> people.<br>
+    Set B includes ${vennData.Bonly} only + ${vennData.overlap} both = <u>${vennData.Bonly + vennData.overlap}</u> people.<br>
+    Neither (complement): ${vennData.neither} people.</b>`;
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
 }
-document.getElementById('new-venn').onclick=newVenn;
-document.getElementById('reset-venn').onclick=function(){
+
+document.getElementById('new-venn').onclick = newVenn;
+document.getElementById('reset-venn').onclick = () => {
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
 };
-document.getElementById('venn-form').onsubmit=function(e){
+
+document.getElementById('venn-form').onsubmit = function(e){
   e.preventDefault();
-  const guess = parseInt(document.getElementById('venn-overlap').value);
+  const guess = parseInt(document.getElementById('venn-overlap').value.trim());
+  const feedback = document.getElementById('venn-feedback');
+  if(isNaN(guess)){
+    feedback.textContent = "Please enter a valid number.";
+    feedback.className = "incorrect";
+    return;
+  }
   if(guess === vennData.overlap){
-    document.getElementById('venn-feedback').innerHTML = "<span class='correct'>🎉 Correct!</span>";
+    feedback.textContent = "🎉 Correct!";
+    feedback.className = "correct";
   } else {
-    document.getElementById('venn-feedback').innerHTML = "<span class='incorrect'>❌ Not right. Try again!</span>";
+    feedback.textContent = `❌ Incorrect, try again. Hint: The overlap is between Set A and Set B.`;
+    feedback.className = "incorrect";
   }
 };
+
 newVenn();
 </script>
 
