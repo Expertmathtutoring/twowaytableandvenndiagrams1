@@ -95,6 +95,7 @@
       <button type="submit">Submit Answer</button>
     </form>
     <div id="venn-feedback" role="alert" aria-live="assertive" style="margin-top:8px;"></div>
+    <div id="venn-questions" class="questions" aria-live="polite" style="margin-top:20px;"></div>
   </div>
 </div>
 
@@ -283,9 +284,6 @@ let vennData = null;
 function drawVenn() {
   const { Aonly, Bonly, overlap, neither } = vennData;
 
-  // Show inside circles: Set A only, Set B only, Overlap
-  // OUTSIDE circles: Total (rectangle), Set A TOTAL, Set B TOTAL, complement
-
   const setATotal = Aonly + overlap;
   const setBTotal = Bonly + overlap;
 
@@ -293,15 +291,12 @@ function drawVenn() {
     xaxis: { range: [0, 4], showgrid: false, zeroline: false, showticklabels: false },
     yaxis: { range: [0, 3], showgrid: false, zeroline: false, showticklabels: false },
     shapes: [
-      // Rectangle for total population around circles
       { type: 'rect', xref: 'x', yref: 'y', x0: 0.2, y0: 0.4, x1: 3.8, y1: 2.6,
         line: { color: '#7f8c8d', width: 2 }, fillcolor: 'rgba(200,200,200,0.15)', layer: 'below'
       },
-      // Set A circle
       { type: 'circle', xref: 'x', yref: 'y', x0: 0.8, y0: 0.8, x1: 2.4, y1: 2.4,
         line: { color: '#2980b9', width: 3 }, fillcolor: 'rgba(41,128,185,0.15)', layer: 'below'
       },
-      // Set B circle
       { type: 'circle', xref: 'x', yref: 'y', x0: 1.6, y0: 0.8, x1: 3.2, y1: 2.4,
         line: { color: '#27ae60', width: 3 }, fillcolor: 'rgba(39,174,96,0.15)', layer: 'below'
       }
@@ -309,23 +304,102 @@ function drawVenn() {
     margin: { t: 60, l: 40, r: 40, b: 40 },
     showlegend: false,
     annotations: [
-      // Inside circles: show A only, B only, Overlap
       { x: 1.1, y: 1.85, text: `A only:<br><b>${Aonly}</b>`, showarrow: false, font: { color: '#2980b9', size: 14 } },
       { x: 2.9, y: 1.85, text: `B only:<br><b>${Bonly}</b>`, showarrow: false, font: { color: '#27ae60', size: 14 } },
       { x: 2.0, y: 1.5, text: `Both:<br><b>${overlap}</b>`, showarrow: false, font: { color: '#b7950b', size: 14 } },
 
-      // Outside circles - total rectangle top-left
       { x: 0.4, y: 2.5, text: `Total:<br><b>${vennData.total}</b>`, showarrow: false, font: { color: '#7f8c8d', size: 16, family: 'Arial Black' } },
-      // Set A total (outside circle at top)
       { x: 0.95, y: 2.5, text: `Set A total:<br><b>${setATotal}</b>`, showarrow: false, font: { color: '#2980b9', size: 14 } },
-      // Set B total (outside circle at top)
       { x: 2.9, y: 2.5, text: `Set B total:<br><b>${setBTotal}</b>`, showarrow: false, font: { color: '#27ae60', size: 14 } },
-      // Neither/complement bottom-right
       { x: 3.4, y: 0.5, text: `Complement (Neither):<br><b>${neither}</b>`, showarrow: false, font: { color: '#7f8c8d', size: 14 } }
     ]
   };
 
   Plotly.newPlot('venn-plot', [], layout, {displayModeBar: false, responsive: true});
+}
+
+// Generate probability questions based on vennData
+function generateVennProbabilityQuestions() {
+  const { total, Aonly, Bonly, overlap, neither } = vennData;
+  const setATotal = Aonly + overlap;
+  const setBTotal = Bonly + overlap;
+
+  const questionsDiv = document.getElementById('venn-questions');
+  questionsDiv.innerHTML = "";
+
+  const qdata = [
+    {
+      question: `What is the probability that a randomly chosen person is in Set A only? (i.e. in A but not in B)`,
+      correct: (Aonly / total).toFixed(3),
+      id: 'v1'
+    },
+    {
+      question: `What is the probability that a randomly chosen person is in Set B only? (i.e. in B but not in A)`,
+      correct: (Bonly / total).toFixed(3),
+      id: 'v2'
+    },
+    {
+      question: `What is the probability that a randomly chosen person is in both Set A and Set B?`,
+      correct: (overlap / total).toFixed(3),
+      id: 'v3'
+    },
+    {
+      question: `What is the probability that a randomly chosen person is in Set A (including those also in B)?`,
+      correct: (setATotal / total).toFixed(3),
+      id: 'v4'
+    },
+    {
+      question: `What is the probability that a randomly chosen person is in Set B (including those also in A)?`,
+      correct: (setBTotal / total).toFixed(3),
+      id: 'v5'
+    },
+    {
+      question: `What is the probability that a randomly chosen person is in neither set?`,
+      correct: (neither / total).toFixed(3),
+      id: 'v6'
+    }
+  ];
+
+  qdata.forEach(({question, correct, id}) => {
+    const qItem = document.createElement('div');
+    qItem.className = 'question-item';
+    qItem.innerHTML =
+    `
+      <label for="${id}_input" class="inline">${question}</label>
+      <input type="text" id="${id}_input" placeholder="e.g. 0.123" aria-label="${question}" />
+      <button aria-label="Check answer for question: ${question}" type="button" data-qid="${id}">Check</button>
+      <span id="${id}_feedback" role="alert" aria-live="assertive" style="margin-left:8px;"></span>
+    `;
+    questionsDiv.appendChild(qItem);
+  });
+
+  questionsDiv.querySelectorAll('button').forEach(btn => {
+    btn.onclick = function(){
+      const qid = btn.getAttribute('data-qid');
+      const input = document.getElementById(qid + '_input');
+      const userAnswerRaw = input.value.trim();
+      const feedbackEl = document.getElementById(qid + '_feedback');
+      const correctAnswer = parseFloat(qdata.find(q=>q.id === qid).correct);
+      const userAnswer = parseFloat(userAnswerRaw);
+      if (userAnswerRaw === "") {
+        feedbackEl.textContent = "Please enter a probability.";
+        feedbackEl.className = "incorrect";
+        return;
+      }
+      if (isNaN(userAnswer) || userAnswer < 0 || userAnswer > 1) {
+        feedbackEl.textContent = "Please enter a valid probability between 0 and 1.";
+        feedbackEl.className = "incorrect";
+        return;
+      }
+      if (Math.abs(userAnswer - correctAnswer) <= 0.005) {
+        feedbackEl.textContent = "🎉 Correct!";
+        feedbackEl.className = "correct";
+      } else {
+        feedbackEl.textContent = `❌ Incorrect, try again.`;
+        feedbackEl.className = "incorrect";
+      }
+    };
+  });
 }
 
 function newVenn() {
@@ -338,6 +412,8 @@ function newVenn() {
     Neither (complement): ${vennData.neither} people.</b>`;
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
+
+  generateVennProbabilityQuestions();
 }
 
 document.getElementById('new-venn').onclick = newVenn;
@@ -365,7 +441,6 @@ document.getElementById('venn-form').onsubmit = function(e){
 };
 
 newVenn();
-
 </script>
 
 </body>
