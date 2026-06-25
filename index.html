@@ -268,7 +268,7 @@ newTableExample();
 // --- VENN DIAGRAM ---
 
 function randomVennData(){
-  let total = Math.floor(Math.random()*18)+20; // bigger totals for clarity
+  let total = Math.floor(Math.random()*18)+20; 
   let Aonly = Math.floor(Math.random()*(total/2-4)) + 3;
   let Bonly = Math.floor(Math.random()*(total/2-4)) + 3;
   let overlapMax = total - (Aonly + Bonly);
@@ -282,41 +282,50 @@ let vennData = null;
 
 function drawVenn() {
   const { Aonly, Bonly, overlap, neither } = vennData;
+
+  // Show inside circles: Set A only, Set B only, Overlap
+  // OUTSIDE circles: Total (rectangle), Set A TOTAL, Set B TOTAL, complement
+
   const setATotal = Aonly + overlap;
   const setBTotal = Bonly + overlap;
 
-  // Clear any previous plot
   const layout = {
     xaxis: { range: [0, 4], showgrid: false, zeroline: false, showticklabels: false },
     yaxis: { range: [0, 3], showgrid: false, zeroline: false, showticklabels: false },
     shapes: [
+      // Rectangle for total population around circles
       { type: 'rect', xref: 'x', yref: 'y', x0: 0.2, y0: 0.4, x1: 3.8, y1: 2.6,
         line: { color: '#7f8c8d', width: 2 }, fillcolor: 'rgba(200,200,200,0.15)', layer: 'below'
-      }, // rectangle outside sets representing total population
+      },
+      // Set A circle
       { type: 'circle', xref: 'x', yref: 'y', x0: 0.8, y0: 0.8, x1: 2.4, y1: 2.4,
-        line: { color: '#2980b9', width: 3 }, fillcolor: 'rgba(41, 128, 185, 0.15)', layer: 'below' },
+        line: { color: '#2980b9', width: 3 }, fillcolor: 'rgba(41,128,185,0.15)', layer: 'below'
+      },
+      // Set B circle
       { type: 'circle', xref: 'x', yref: 'y', x0: 1.6, y0: 0.8, x1: 3.2, y1: 2.4,
-        line: { color: '#27ae60', width: 3 }, fillcolor: 'rgba(39, 174, 96, 0.15)', layer: 'below' }
+        line: { color: '#27ae60', width: 3 }, fillcolor: 'rgba(39,174,96,0.15)', layer: 'below'
+      }
     ],
     margin: { t: 60, l: 40, r: 40, b: 40 },
     showlegend: false,
     annotations: [
-      // Inside circles: set only parts
+      // Inside circles: show A only, B only, Overlap
       { x: 1.1, y: 1.85, text: `A only:<br><b>${Aonly}</b>`, showarrow: false, font: { color: '#2980b9', size: 14 } },
       { x: 2.9, y: 1.85, text: `B only:<br><b>${Bonly}</b>`, showarrow: false, font: { color: '#27ae60', size: 14 } },
-      // Overlap center
       { x: 2.0, y: 1.5, text: `Both:<br><b>${overlap}</b>`, showarrow: false, font: { color: '#b7950b', size: 14 } },
-      // Outside circles: totals and neither/complement
+
+      // Outside circles - total rectangle top-left
       { x: 0.4, y: 2.5, text: `Total:<br><b>${vennData.total}</b>`, showarrow: false, font: { color: '#7f8c8d', size: 16, family: 'Arial Black' } },
+      // Set A total (outside circle at top)
       { x: 0.95, y: 2.5, text: `Set A total:<br><b>${setATotal}</b>`, showarrow: false, font: { color: '#2980b9', size: 14 } },
+      // Set B total (outside circle at top)
       { x: 2.9, y: 2.5, text: `Set B total:<br><b>${setBTotal}</b>`, showarrow: false, font: { color: '#27ae60', size: 14 } },
+      // Neither/complement bottom-right
       { x: 3.4, y: 0.5, text: `Complement (Neither):<br><b>${neither}</b>`, showarrow: false, font: { color: '#7f8c8d', size: 14 } }
     ]
   };
 
-  const data = [ /* no traces; just annotations and shapes */ ];
-
-  Plotly.newPlot('venn-plot', data, layout, {displayModeBar: false, responsive: true});
+  Plotly.newPlot('venn-plot', [], layout, {displayModeBar: false, responsive: true});
 }
 
 function newVenn() {
