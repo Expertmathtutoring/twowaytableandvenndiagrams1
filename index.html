@@ -167,6 +167,51 @@ function updateTotals(){
   document.getElementById(id).addEventListener('input', updateTotals);
 });
 
+function fractionToDecimal(str) {
+  // Converts fraction string like "1/2" to decimal 0.5, else NaN if invalid
+  if (!str.includes('/')) return NaN;
+  const parts = str.split('/');
+  if(parts.length !== 2) return NaN;
+  const numerator = parseFloat(parts[0]);
+  const denominator = parseFloat(parts[1]);
+  if (isNaN(numerator) || isNaN(denominator) || denominator === 0) return NaN;
+  return numerator/denominator;
+}
+
+function parseProbabilityInput(input) {
+  // Accepts whole number, decimal, fraction (e.g., 1/2), percentage (e.g., 50%)
+  let val = input.trim().toLowerCase();
+
+  if (val === '') return NaN;
+
+  // Percentage
+  if (val.endsWith('%')) {
+    val = val.slice(0, -1);
+    let p = parseFloat(val);
+    if (isNaN(p)) return NaN;
+    return p / 100;
+  }
+
+  // Fraction
+  if (val.includes('/')) {
+    let frac = fractionToDecimal(val);
+    if (!isNaN(frac)) return frac;
+    return NaN;
+  }
+
+  // Decimal or whole number - parse float and normalize if >1 (assume whole number count)
+  let num = parseFloat(val);
+  if (isNaN(num)) return NaN;
+
+  // If more than 1, assume whole number over 1 (not probability), convert to fraction over total?
+  // But here questions require probability, so if >1 return NaN (invalid)
+  if (num > 1) return NaN; 
+
+  if(num < 0) return NaN;
+
+  return num;
+}
+
 function generateTableQuestions(){
   const ex = tableExamples[tableIdx];
   const c11 = getCellNumber("cell11"),
@@ -181,37 +226,42 @@ function generateTableQuestions(){
     {
       question: `How many have <b>${ex.rowHeads[0]}</b> AND <b>${ex.colHeads[0]}</b>?`,
       correct: c11,
-      id: 'q1'
+      id: 'q1',
+      type: 'number'
     },
     {
       question: `How many have <b>${ex.rowHeads[0]}</b> AND <b>${ex.colHeads[1]}</b>?`,
       correct: c12,
-      id: 'q2'
+      id: 'q2',
+      type: 'number'
     },
     {
       question: `How many have <b>${ex.rowHeads[1]}</b> AND <b>${ex.colHeads[0]}</b>?`,
       correct: c21,
-      id: 'q3'
+      id: 'q3',
+      type: 'number'
     },
     {
       question: `How many have <b>${ex.rowHeads[1]}</b> AND <b>${ex.colHeads[1]}</b>?`,
       correct: c22,
-      id: 'q4'
+      id: 'q4',
+      type: 'number'
     },
     {
       question: `What is the total number of people?`,
       correct: c11 + c12 + c21 + c22,
-      id: 'q5'
+      id: 'q5',
+      type: 'number'
     }
   ];
 
-  qdata.forEach(({question, correct, id}) => {
+  qdata.forEach(({question, correct, id, type}) => {
     const qItem = document.createElement('div');
     qItem.className = 'question-item';
     qItem.innerHTML =
     `
       <label for="${id}_input" class="inline">${question}</label>
-      <input type="number" min="0" id="${id}_input" aria-label="${question}"/>
+      <input type="${type === 'number' ? 'number' : 'text'}" id="${id}_input" aria-label="${question}" ${type === 'number' ? 'min="0"' : ''} placeholder="${type === 'number' ? '' : 'e.g. 0.25, 1/4, 25%'}" />
       <button aria-label="Check answer for question: ${question}" type="button" data-qid="${id}">Check</button>
       <span id="${id}_feedback" role="alert" aria-live="assertive" style="margin-left:8px;"></span>
     `;
@@ -222,19 +272,48 @@ function generateTableQuestions(){
     btn.onclick = function(){
       const qid = btn.getAttribute('data-qid');
       const input = document.getElementById(qid + '_input');
-      const userAnswer = parseInt(input.value);
+      const userAnswerRaw = input.value.trim();
       const feedbackEl = document.getElementById(qid + '_feedback');
-      const correctAnswer = qdata.find(q=>q.id === qid).correct;
-      if (isNaN(userAnswer)) {
-        feedbackEl.textContent = "Please enter a number.";
+      const q = qdata.find(q=>q.id === qid);
+
+      if(userAnswerRaw === "") {
+        feedbackEl.textContent = "Please enter an answer.";
         feedbackEl.className = "incorrect";
         return;
       }
-      if (userAnswer === correctAnswer) {
+
+      // Number type questions: require exact integer equal
+      if (q.type === 'number') {
+        const userAnswer = parseInt(userAnswerRaw);
+        if (isNaN(userAnswer)) {
+          feedbackEl.textContent = "Please enter a valid whole number.";
+          feedbackEl.className = "incorrect";
+          return;
+        }
+        if (userAnswer === q.correct) {
+          feedbackEl.textContent = "🎉 Correct!";
+          feedbackEl.className = "correct";
+        } else {
+          feedbackEl.textContent = "❌ Incorrect, try again.";
+          feedbackEl.className = "incorrect";
+        }
+        return;
+      }
+
+      // Else (for probabilities) parse flexible input
+      const userProb = parseProbabilityInput(userAnswerRaw);
+      if (isNaN(userProb) || userProb < 0 || userProb > 1) {
+        feedbackEl.textContent = "Please enter a valid probability (decimal between 0 and 1, fraction like 1/4, or percentage like 25%).";
+        feedbackEl.className = "incorrect";
+        return;
+      }
+      const correctProb = parseFloat(q.correct);
+
+      if (Math.abs(userProb - correctProb) <= 0.005) {
         feedbackEl.textContent = "🎉 Correct!";
         feedbackEl.className = "correct";
       } else {
-        feedbackEl.textContent = `❌ Incorrect, try again.`;
+        feedbackEl.textContent = "❌ Incorrect, try again.";
         feedbackEl.className = "incorrect";
       }
     };
@@ -331,42 +410,48 @@ function generateVennProbabilityQuestions() {
     {
       question: `What is the probability that a randomly chosen person is in Set A only? (i.e. in A but not in B)`,
       correct: (Aonly / total).toFixed(3),
-      id: 'v1'
+      id: 'v1',
+      type: 'probability'
     },
     {
       question: `What is the probability that a randomly chosen person is in Set B only? (i.e. in B but not in A)`,
       correct: (Bonly / total).toFixed(3),
-      id: 'v2'
+      id: 'v2',
+      type: 'probability'
     },
     {
       question: `What is the probability that a randomly chosen person is in both Set A and Set B?`,
       correct: (overlap / total).toFixed(3),
-      id: 'v3'
+      id: 'v3',
+      type: 'probability'
     },
     {
       question: `What is the probability that a randomly chosen person is in Set A (including those also in B)?`,
       correct: (setATotal / total).toFixed(3),
-      id: 'v4'
+      id: 'v4',
+      type: 'probability'
     },
     {
       question: `What is the probability that a randomly chosen person is in Set B (including those also in A)?`,
       correct: (setBTotal / total).toFixed(3),
-      id: 'v5'
+      id: 'v5',
+      type: 'probability'
     },
     {
       question: `What is the probability that a randomly chosen person is in neither set?`,
       correct: (neither / total).toFixed(3),
-      id: 'v6'
+      id: 'v6',
+      type: 'probability'
     }
   ];
 
-  qdata.forEach(({question, correct, id}) => {
+  qdata.forEach(({question, correct, id, type}) => {
     const qItem = document.createElement('div');
     qItem.className = 'question-item';
     qItem.innerHTML =
     `
       <label for="${id}_input" class="inline">${question}</label>
-      <input type="text" id="${id}_input" placeholder="e.g. 0.123" aria-label="${question}" />
+      <input type="text" id="${id}_input" placeholder="e.g. 0.123, 1/4, 25%" aria-label="${question}" />
       <button aria-label="Check answer for question: ${question}" type="button" data-qid="${id}">Check</button>
       <span id="${id}_feedback" role="alert" aria-live="assertive" style="margin-left:8px;"></span>
     `;
@@ -379,27 +464,64 @@ function generateVennProbabilityQuestions() {
       const input = document.getElementById(qid + '_input');
       const userAnswerRaw = input.value.trim();
       const feedbackEl = document.getElementById(qid + '_feedback');
-      const correctAnswer = parseFloat(qdata.find(q=>q.id === qid).correct);
-      const userAnswer = parseFloat(userAnswerRaw);
-      if (userAnswerRaw === "") {
-        feedbackEl.textContent = "Please enter a probability.";
+      const q = qdata.find(q=>q.id === qid);
+
+      if(userAnswerRaw === "") {
+        feedbackEl.textContent = "Please enter an answer.";
         feedbackEl.className = "incorrect";
         return;
       }
-      if (isNaN(userAnswer) || userAnswer < 0 || userAnswer > 1) {
-        feedbackEl.textContent = "Please enter a valid probability between 0 and 1.";
-        feedbackEl.className = "incorrect";
+
+      // For probability type questions, parse flexible input
+      if (q.type === 'probability') {
+        const userProb = parseProbabilityInput(userAnswerRaw);
+        if (isNaN(userProb) || userProb < 0 || userProb > 1) {
+          feedbackEl.textContent = "Please enter a valid probability (decimal between 0 and 1, fraction like 1/4, or percentage like 25%).";
+          feedbackEl.className = "incorrect";
+          return;
+        }
+        const correctProb = parseFloat(q.correct);
+        if (Math.abs(userProb - correctProb) <= 0.005) {
+          feedbackEl.textContent = "🎉 Correct!";
+          feedbackEl.className = "correct";
+        } else {
+          feedbackEl.textContent = "❌ Incorrect, try again.";
+          feedbackEl.className = "incorrect";
+        }
         return;
-      }
-      if (Math.abs(userAnswer - correctAnswer) <= 0.005) {
-        feedbackEl.textContent = "🎉 Correct!";
-        feedbackEl.className = "correct";
-      } else {
-        feedbackEl.textContent = `❌ Incorrect, try again.`;
-        feedbackEl.className = "incorrect";
       }
     };
   });
+}
+
+function fractionToDecimal(str) {
+  if (!str.includes('/')) return NaN;
+  const parts = str.split('/');
+  if(parts.length !== 2) return NaN;
+  const numerator = parseFloat(parts[0]);
+  const denominator = parseFloat(parts[1]);
+  if (isNaN(numerator) || isNaN(denominator) || denominator === 0) return NaN;
+  return numerator/denominator;
+}
+
+function parseProbabilityInput(input) {
+  let val = input.trim().toLowerCase();
+  if (val === '') return NaN;
+  if (val.endsWith('%')) {
+    val = val.slice(0, -1);
+    let p = parseFloat(val);
+    if (isNaN(p)) return NaN;
+    return p / 100;
+  }
+  if (val.includes('/')) {
+    let frac = fractionToDecimal(val);
+    if (!isNaN(frac)) return frac;
+    return NaN;
+  }
+  let num = parseFloat(val);
+  if (isNaN(num)) return NaN;
+  if(num > 1 || num < 0) return NaN;
+  return num;
 }
 
 function newVenn() {
@@ -420,6 +542,7 @@ document.getElementById('new-venn').onclick = newVenn;
 document.getElementById('reset-venn').onclick = () => {
   document.getElementById('venn-form').reset();
   document.getElementById('venn-feedback').textContent = "";
+  document.getElementById('venn-questions').innerHTML = "";
 };
 
 document.getElementById('venn-form').onsubmit = function(e){
@@ -440,7 +563,9 @@ document.getElementById('venn-form').onsubmit = function(e){
   }
 };
 
+newTableExample();
 newVenn();
+
 </script>
 
 </body>
